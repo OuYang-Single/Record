@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#ffffff</color>
+    <color name="colorAccent">#999999</color>
+    <color name="white">#FFFFFF</color>
+    <color name="prompt_txt_color">#b1b1b1</color>
+    <color name="prompt_line_color">#e4e3e3</color>
+    <color name="highlight_txt_color">#2acaff</color>
+    <color name="bt_color">#2EB493</color>
+    <color name="bt_wait_bg_color">#9AE4E3E3</color>
+    <color name="prompt_other_line_color">#9f9f9f</color>
+    <color name="other_txt_color">#aeaeae</color>
+    <color name="txt_color">#000000</color>
+    <color name="text_color_navigation">#292929</color>
+    <color name="toolbar_color">#ffffff</color>
+    <color name="toolbar_title_color">#2A2C33</color>
+    <color name="toolbar_right_color">#2A2C33</color>
+    <color name="mine_title_bg">#2e343e</color>
+
+
+    <color name="chart_red">#ff7858</color>
+    <color name="chart_green">#00c087</color>
+    <color name="chart_greens">#0da88f</color>
+    <color name="chart_prompt">#cccccc</color>
+    <color name="chart_table_line">#ddb060</color>
+    <color name="chart_table_text">#edd3a4</color>
+    <color name="chart_text_minor">#999999</color>
+
+    <color name="chart_ma5">#18CCF6</color>
+    <color name="chart_ma10">#FE5EDF</color>
+    <color name="chart_ma20">#E7A520</color>
+    <color name="chart_white">#fff</color>
+    <color name="chart_reds">#ff1717</color>
+
+    <color name="chart_background">#202326</color>
+    <color name="chart_grid_line">#353941</color>
+    <color name="chart_text">#B1B2B6</color>
+    <color name="chart_selector">#c830343C</color>
+    <color name="chart_tab_background">#30343C</color>
+    <color name="chart_tab_indicator">#FF6601</color>
+    <color name="chart_highlight">#232833</color>
+    <color name="selected_text_color">#FFCB6D</color>
+
+
+    <color name="white60">#a0ffffff</color>
+    <color name="white_two">#efefef</color>
+    <color name="white_three">#ebebeb</color>
+    <color name="white_four">#e0e0e0</color>
+    <color name="white_five">#dadada</color>
+    <color name="blue">#031cd7</color>
+    <color name="black">#000000</color>
+    <color name="ivory">#000000</color>
+    <color name="ivory_dark">#000000</color>
+    <color name="black_10">#000000</color>
+    <color name="gray_transparent">#000000</color>
+    <color name="green_dark">#000000</color>
+    <color name="gray_dark_transparent">#000000</color>
+    <color name="brown">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="gray">#e0e0e0</color>
+    <color name="dark_gray">#282a2b</color>
+    <color name="dark_grey_two">#191a1b</color>
+    <color name="warm_grey">#7f7f7f</color>
+    <color name="warm_grey_two">#9c9c9c</color>
+    <color name="warm_grey_three">#8b8b8b</color>
+    <color name="warm_grey_four">#979797</color>
+    <color name="dark_mint">#51c05c</color>
+    <color name="cornflower_blue_two">#4f62d7</color>
+    <color name="cornflower_blue_two_24">#3d4f62d7</color>
+    <color name="cornflower_blue_two_dark">#475bd4</color>
+    <color name="cornflower_blue_light_40">#64bec5f7</color>
+
+    <color name="dialog_divider">@color/white_three</color>
+    <color name="dialog_title_text">@color/dark_gray</color>
+    <color name="dialog_message_text">@color/warm_grey</color>
+    <color name="dialog_date_text">@color/warm_grey_two</color>
+    <color name="dialog_unread_text">@color/white</color>
+    <color name="dialog_unread_bubble">@color/dark_mint</color>
+
+
+    <color name="triangle">#aa72d572</color>
+    <color name="circle">#aa738ffe</color>
+    <color name="rect">#aae84e40</color>
+
+
+
+    <color name="pull_to_refresh_bg_color">#f6f6f6</color>
+    <color name="timeline_home_bg_color">#f6f6f6</color>
+    <color name="pull_to_refresh_tips_color">#101010</color>
+    <color name="pull_to_refresh_time_color">#706F6F</color>
+    <color name="loading_bar_text_color">#737373</color>
+
+    <color name="list_title_color">#141414</color>
+
+    <color name="title_bar_bg">#22292c</color>
+    <color name="title_bar_text">#ffffff</color>
+
+    <color name="dialog_title_text_color">#13b791</color>
+
+    <color name="list_state_offline">#ff0000</color>
+    <color name="list_state_online">#6ccdb3</color>
+
+    <color name="list_state_text_color">#999999</color>
+    <color name="article_edit_title_bg">#888888</color>
+    <color name="article_edit_title_text">#000000</color>
+
+    <color name="edit_border_color">#cccccc</color>
+
+    <color name="device_detail_service">#cccccc</color>
+    <color name="device_detail_character">#ffffff</color>
+</resources>
