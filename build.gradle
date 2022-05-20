@@ -5,7 +5,18 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
 
+            url "https://maven.aliyun.com/repository/google"
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/public"
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/central"
+        }
+        maven { url 'https://jitpack.io' } // add repository
+        maven { url "https://wosk.top/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
@@ -29,6 +40,17 @@ allprojects {
         maven { url 'http://developer.huawei.com/repo/' }
         maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
         maven { url "https://jitpack.io" }
+        maven { url "https://wosk.top/" }
+        maven {
+            url "https://maven.aliyun.com/repository/public"
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/central"
+        }
+        maven {
+
+            url "https://maven.aliyun.com/repository/google"
+        }
     }
 }
 

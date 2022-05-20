@@ -50,6 +50,7 @@ public class StartActivity extends BaseActivity<StartPresenter> implements Start
     public void initData(@Nullable Bundle savedInstanceState) {
         if (mManagerFactory.getStudentManager(this).queryAll().size()>0) {
 
+            goActivity( RoutingUtils.VIDEO_FILE_PATH);
         }else {
             goActivity( RoutingUtils.MAIN_PATH);
         }

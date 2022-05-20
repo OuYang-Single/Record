@@ -8,8 +8,9 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-import com.mmt.record.mvp.model.utils.NetworkType;
-import com.mmt.record.mvp.model.utils.NetworkUtil;
+import com.mmt.record.mvp.model.mvp.util.NetworkType;
+import com.mmt.record.mvp.model.mvp.util.NetworkUtil;
+
  
 import java.util.ArrayList;
 import java.util.List;

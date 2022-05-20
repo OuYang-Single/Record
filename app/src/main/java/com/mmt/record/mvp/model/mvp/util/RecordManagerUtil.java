@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.view.SurfaceView;
 
 
+import com.deep.dpwork.util.CountDownTimeTextUtil;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -108,7 +109,7 @@ public class RecordManagerUtil {
                 mediaUtils.setTargetDir(parentFile);
 
                 mediaUtils.setTargetName(
-                        "R_" + CountDownTimeTextUtil.nowTime().replace(':', '.')
+                        "R_" + nowTime().replace(':', '.')
                                 .replace(' ', '_') + "-" + System.currentTimeMillis() + ".mp4"
                 );
 
@@ -128,7 +129,12 @@ public class RecordManagerUtil {
         isRecording = mediaUtils.isRecording();
         startTime = 0;
     }
-
+    public static String nowTime() {
+        long time = System.currentTimeMillis();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MMdd", Locale.CHINA);
+        Date d1 = new Date(time);
+        return format.format(d1);
+    }
     /**
      * 删除单个文件
      *

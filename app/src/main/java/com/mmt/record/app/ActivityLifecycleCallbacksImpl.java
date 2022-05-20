@@ -17,7 +17,8 @@ import com.alibaba.android.arouter.launcher.ARouter;
 
 import com.mmt.record.R;
 import com.mmt.record.mvp.model.mvp.ui.Receiver.NetStateChangeObserver;
-import com.mmt.record.mvp.model.utils.NetworkType;
+import com.mmt.record.mvp.model.mvp.util.NetworkType;
+import com.mmt.record.mvp.model.mvp.util.StatusBarUtils;
 
 
 import timber.log.Timber;
@@ -32,7 +33,7 @@ import timber.log.Timber;
  * <a href="https://github.com/JessYanCoding">Follow me</a>
  * ================================================
  */
-public class ActivityLifecycleCallbacksImpl implements Application.ActivityLifecycleCallbacks, NetStateChangeObserver {
+public class ActivityLifecycleCallbacksImpl implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -48,13 +49,11 @@ public class ActivityLifecycleCallbacksImpl implements Application.ActivityLifec
     public void onActivityStarted(Activity activity) {
      /*   if ((activity instanceof LogInActivity ||activity instanceof LoginCodeActivity||activity instanceof StartActivity)){
 
-            setStatusBarLightMode(activity.getWindow());
-            activity. setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         }else {
 
         }*/
-
-        //NetStateChangeObserver
+        StatusBarUtils.setStatusBarLightMode(activity.getWindow());
         Timber.i(activity + " - onActivityStarted");
 
        // StatusBarUtil.setStatusBarLightMode(activity.getWindow());
@@ -118,13 +117,5 @@ public class ActivityLifecycleCallbacksImpl implements Application.ActivityLifec
         activity.getIntent().removeExtra("isInitToolbar");
     }
 
-    @Override
-    public void onNetDisconnected() {
 
-    }
-
-    @Override
-    public void onNetConnected(NetworkType networkType) {
-
-    }
 }

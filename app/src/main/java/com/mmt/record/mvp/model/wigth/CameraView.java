@@ -18,10 +18,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 
+import com.deep.dpwork.util.CountDownTimeTextUtil;
 import com.mmt.record.mvp.model.mvp.util.AtWavUtil;
 import com.mmt.record.mvp.model.mvp.util.AudioRecordUtil;
 import com.mmt.record.mvp.model.mvp.util.AvcEncoder;
-import com.mmt.record.mvp.model.mvp.util.CountDownTimeTextUtil;
+
 import com.mmt.record.mvp.model.mvp.util.FileUtil;
 import com.mmt.record.mvp.model.mvp.util.NV21RotateUtil;
 

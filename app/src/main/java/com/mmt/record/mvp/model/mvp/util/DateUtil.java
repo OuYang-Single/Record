@@ -16,10 +16,9 @@ public class DateUtil {
     public static SimpleDateFormat shortTimeFormat = new SimpleDateFormat("HH:mm");
     public static SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy/MM/dd");
     public static String timeStamp2Date(Long auser) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
-        long signtime = ((long)(auser))*1000;
-        String lastSignTime = dateFormat.format(new Date(signtime));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        String lastSignTime = dateFormat.format(new Date(auser));
 
 
         return lastSignTime;

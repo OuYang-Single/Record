@@ -230,7 +230,7 @@ public class MediaUtils implements SurfaceHolder.Callback {
                 List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
                 List<Camera.Size> mSupportedVideoSizes = parameters.getSupportedVideoSizes();
                 Camera.Size optimalSize = CameraHelper.getOptimalVideoSize(mSupportedVideoSizes,
-                        mSupportedPreviewSizes, 720, 480);
+                        mSupportedPreviewSizes, 4096, 2160);
                 // Use the same size for recording profile.
                 previewWidth = optimalSize.width;
                 previewHeight = optimalSize.height;
