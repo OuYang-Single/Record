@@ -13,9 +13,9 @@ public class User implements Parcelable {
     private  Long id;
 
     private String userId;
-    private String username;
+    private String userName;
 
-    private String password;
+    private String passWord;
 
     private String email;
 
@@ -26,6 +26,7 @@ public class User implements Parcelable {
     private String avatar;
 
     private String answer;
+    private long expireTime;
 
     private Integer role;
 
@@ -42,13 +43,14 @@ public class User implements Parcelable {
             id = in.readLong();
         }
         userId = in.readString();
-        username = in.readString();
-        password = in.readString();
+        userName = in.readString();
+        passWord = in.readString();
         email = in.readString();
         phone = in.readString();
         question = in.readString();
         avatar = in.readString();
         answer = in.readString();
+        expireTime = in.readLong();
         if (in.readByte() == 0) {
             role = null;
         } else {
@@ -59,20 +61,21 @@ public class User implements Parcelable {
         token = in.readString();
     }
 
-    @Generated(hash = 957569213)
-    public User(Long id, String userId, String username, String password,
-                String email, String phone, String question, String avatar,
-                String answer, Integer role, long createTime, long updateTime,
-                String token) {
+    @Generated(hash = 366782162)
+    public User(Long id, String userId, String userName, String passWord,
+            String email, String phone, String question, String avatar,
+            String answer, long expireTime, Integer role, long createTime,
+            long updateTime, String token) {
         this.id = id;
         this.userId = userId;
-        this.username = username;
-        this.password = password;
+        this.userName = userName;
+        this.passWord = passWord;
         this.email = email;
         this.phone = phone;
         this.question = question;
         this.avatar = avatar;
         this.answer = answer;
+        this.expireTime = expireTime;
         this.role = role;
         this.createTime = createTime;
         this.updateTime = updateTime;
@@ -83,36 +86,53 @@ public class User implements Parcelable {
     public User() {
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if (id == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(id);
+
+
+
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
         }
-        dest.writeString(userId);
-        dest.writeString(username);
-        dest.writeString(password);
-        dest.writeString(email);
-        dest.writeString(phone);
-        dest.writeString(question);
-        dest.writeString(avatar);
-        dest.writeString(answer);
-        if (role == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeInt(role);
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
         }
-        dest.writeLong(createTime);
-        dest.writeLong(updateTime);
-        dest.writeString(token);
-    }
+    };
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        if (id == null) {
+            parcel.writeByte((byte) 0);
+        } else {
+            parcel.writeByte((byte) 1);
+            parcel.writeLong(id);
+        }
+        parcel.writeString(userId);
+        parcel.writeString(userName);
+        parcel.writeString(passWord);
+        parcel.writeString(email);
+        parcel.writeString(phone);
+        parcel.writeString(question);
+        parcel.writeString(avatar);
+        parcel.writeString(answer);
+        parcel.writeLong(expireTime);
+        if (role == null) {
+            parcel.writeByte((byte) 0);
+        } else {
+            parcel.writeByte((byte) 1);
+            parcel.writeInt(role);
+        }
+        parcel.writeLong(createTime);
+        parcel.writeLong(updateTime);
+        parcel.writeString(token);
     }
 
     public Long getId() {
@@ -131,20 +151,20 @@ public class User implements Parcelable {
         this.userId = userId;
     }
 
-    public String getUsername() {
-        return this.username;
+    public String getUserName() {
+        return this.userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getPassword() {
-        return this.password;
+    public String getPassWord() {
+        return this.passWord;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
     }
 
     public String getEmail() {
@@ -187,6 +207,14 @@ public class User implements Parcelable {
         this.answer = answer;
     }
 
+    public long getExpireTime() {
+        return this.expireTime;
+    }
+
+    public void setExpireTime(long expireTime) {
+        this.expireTime = expireTime;
+    }
+
     public Integer getRole() {
         return this.role;
     }
@@ -219,15 +247,5 @@ public class User implements Parcelable {
         this.token = token;
     }
 
-    public static final Creator<User> CREATOR = new Creator<User>() {
-        @Override
-        public User createFromParcel(Parcel in) {
-            return new User(in);
-        }
-
-        @Override
-        public User[] newArray(int size) {
-            return new User[size];
-        }
-    };
+  
 }

@@ -2,5 +2,9 @@
     <string name="app_name">Record</string>
     <string name="log_bt_log_in">登录</string>
     <string name="code">请输入密码</string>
-    <string name="code_phono">请输入正确的手机号</string>
+    <string name="code_phono">请输入账号</string>
+    <string name="ps_all_audio">所有音频</string>
+    <string name="ps_camera_roll">相机胶卷</string>
+    <string name="load">登录中...</string>
+    <string name="loade">Loading...</string>
 </resources>

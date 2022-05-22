@@ -13,6 +13,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import me.leefeng.promptlibrary.PromptDialog;
 
 @Module
 public abstract class MainModule {
@@ -23,5 +24,9 @@ public abstract class MainModule {
     public static ManagerFactory getManagerFactory() {
         return ManagerFactory.getInstance();
     }
-
+    @ActivityScope
+    @Provides
+    public static PromptDialog getPromptDialog(MainContract.View view){
+        return new PromptDialog(view.getActivity());
+    }
 }

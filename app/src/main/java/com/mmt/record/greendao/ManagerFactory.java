@@ -2,11 +2,16 @@ package com.mmt.record.greendao;
 
 import android.content.Context;
 
+import com.mmt.record.mvp.model.entity.GpsEntity;
+
 public class ManagerFactory {
     /**
      * 每一个BeanManager都管理着数据库中的一个表，我将这些管理者在ManagerFactory中进行统一管理
      */
     UserManager mUserManager;
+    FileEntityManager mFileEntityManager;
+    FolderEntityManager mFolderEntityManager;
+    GpsEntityManager mGpsEntityManager;
 
 
     private static ManagerFactory mInstance = null;
@@ -32,6 +37,25 @@ public class ManagerFactory {
                 mUserManager = new UserManager(DaoManager.getInstance(context).getDaoSession().getUserDao());
             }
         return mUserManager;
+    }
+    public synchronized FileEntityManager getFileEntityManager(Context context) {
+        if (mFileEntityManager == null){
+            mFileEntityManager = new FileEntityManager(DaoManager.getInstance(context).getDaoSession().getFileEntityDao());
+        }
+        return mFileEntityManager;
+    }
+
+    public synchronized FolderEntityManager getFolderEntityManager(Context context) {
+        if (mFolderEntityManager == null){
+            mFolderEntityManager = new FolderEntityManager(DaoManager.getInstance(context).getDaoSession().getFolderEntityDao());
+        }
+        return mFolderEntityManager;
+    }
+    public synchronized GpsEntityManager getGpsEntityManager(Context context) {
+        if (mGpsEntityManager == null){
+            mGpsEntityManager = new GpsEntityManager(DaoManager.getInstance(context).getDaoSession().getGpsEntityDao());
+        }
+        return mGpsEntityManager;
     }
 }
 

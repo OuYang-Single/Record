@@ -1,9 +1,16 @@
 package com.mmt.record.mvp.model.mvp.util;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+
+import com.mmt.record.mvp.model.entity.FileEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +19,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import timber.log.Timber;
 
 public class FileUtils {
     public void writeFile(Context mContext,long start,long end,  InputStream byteStream,File futureStudioIconFile){
@@ -66,9 +79,9 @@ public class FileUtils {
     }
 
     /**
-     * 将图片转换成Base64编码的字符串
+     *
      */
-    public static String imageToBase64(String path){
+    public static String stringToBase64(String path){
         if(TextUtils.isEmpty(path)){
             return null;
         }
@@ -76,26 +89,138 @@ public class FileUtils {
         byte[] data = null;
         String result = null;
         try{
-            is = new FileInputStream(path);
-            //创建一个字符流大小的数组。
-            data = new byte[is.available()];
-            //写入数组
-            is.read(data);
-            //用默认的编码格式进行编码
-            result = Base64.encodeToString(data,Base64.NO_WRAP);
+            result = Base64.encodeToString(path.getBytes(StandardCharsets.UTF_8),Base64.NO_WRAP);
         }catch (Exception e){
             e.printStackTrace();
-        }finally {
-            if(null !=is){
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
         return result;
+    }
+    /**
+     * 压缩文件和文件夹
+     *
+     * @param srcFileString 要压缩的文件或文件夹
+     * @param zipFileString 压缩完成的Zip路径
+     * @throws Exception
+     */
+    public static void ZipFolder(String srcFileString, String zipFileString) throws Exception {
+        //创建ZIP
+        ZipOutputStream outZip = new ZipOutputStream(new FileOutputStream(zipFileString));
+        //创建文件
+        File file = new File(srcFileString);
+        //压缩
+        ZipFiles(file.getParent()+ File.separator, file.getName(), outZip);
+        //完成和关闭
+        outZip.finish();
+        outZip.close();
+    }
+
+
+    public static void ZipFolder(List<FileEntity> fileEntities, String zipFileString) throws Exception {
+        //创建ZIP
+        ZipOutputStream outZip = new ZipOutputStream(new FileOutputStream(zipFileString));
+        isFile=false;
+        //创建文件
+
+        //压缩
+        ZipFile(fileEntities, outZip);
+        //完成和关闭
+        outZip.finish();
+        outZip.close();
+    }
+
+    /**
+     * 压缩文件
+     *
+     * @param folderString
+     * @param fileString
+     * @param zipOutputSteam
+     * @throws Exception
+     */
+    private static void ZipFiles(String folderString, String fileString, ZipOutputStream zipOutputSteam) throws Exception {
+
+        if (zipOutputSteam == null)
+            return;
+
+        File file = new File(folderString +"/"+ fileString);
+
+        Timber.i("文件:"+file.getName()+"------文件是否存在："+file.isFile());
+        ZipEntry zipEntry = new ZipEntry(fileString);
+        FileInputStream inputStream = new FileInputStream(file);
+        zipOutputSteam.putNextEntry(zipEntry);
+        int len;
+        byte[] buffer = new byte[4096];
+        while ((len = inputStream.read(buffer)) != -1) {
+            zipOutputSteam.write(buffer, 0, len);
+        }
+        zipOutputSteam.closeEntry();
+    }
+
+    /**
+     * 压缩文件
+     *
+     * @param fileEntities
+     * @param zipOutputSteam
+     * @throws Exception
+     */
+    private static void ZipFile( List<FileEntity> fileEntities,ZipOutputStream zipOutputSteam) throws Exception {
+
+        if (zipOutputSteam == null)
+            return;
+        for ( FileEntity fileEntity:fileEntities) {
+            ZipFile(fileEntity.getFolderEntity().getFolderPath()+"/",fileEntity.getFilePath(), zipOutputSteam);
+        }
+    }
+  public   static boolean isFile=false;
+    private static void ZipFile(String folderString, String fileString, ZipOutputStream zipOutputSteam) throws Exception {
+
+        if (zipOutputSteam == null)
+            return;
+        File file = new File(folderString + fileString);
+
+        Timber.i("文件:"+file.getName()+"------文件是否存在："+file.isFile());
+        if (!file.isFile()){
+            return;
+        }
+        isFile=true;
+        ZipEntry zipEntry = new ZipEntry(fileString);
+        FileInputStream inputStream = new FileInputStream(file);
+        zipOutputSteam.putNextEntry(zipEntry);
+        int len;
+        byte[] buffer = new byte[4096];
+        while ((len = inputStream.read(buffer)) != -1) {
+            zipOutputSteam.write(buffer, 0, len);
+        }
+        zipOutputSteam.closeEntry();
+    }
+    /**
+     * 获取设备号
+     * @param context
+     * @return
+     */
+    public static String getDeviceId(Context context) {
+        String deviceId;
+
+        if (Build.VERSION.SDK_INT >= 29) {
+            deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        } else {
+            final TelephonyManager mTelephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                    return "";
+                }
+            }
+            assert mTelephony != null;
+            if (mTelephony.getDeviceId() != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    deviceId = mTelephony.getImei();
+                } else {
+                    deviceId = mTelephony.getDeviceId();
+                }
+            } else {
+                deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+            }
+        }
+        return deviceId;
     }
 
 }

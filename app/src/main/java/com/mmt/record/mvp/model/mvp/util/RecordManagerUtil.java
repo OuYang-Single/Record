@@ -6,10 +6,15 @@ import android.view.SurfaceView;
 
 
 import com.deep.dpwork.util.CountDownTimeTextUtil;
+import com.mmt.record.greendao.FolderEntityDao;
+import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.mvp.model.entity.FileEntity;
+import com.mmt.record.mvp.model.entity.FolderEntity;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +32,10 @@ public class RecordManagerUtil {
     public boolean isRecording;
 
     private File parentFile;
+    private String targetName;
+    private RecordEvent mRecordEvent;
 
+    Activity activity;
     private static RecordManagerUtil recordManagerUtil;
 
     public static RecordManagerUtil getInstance() {
@@ -37,7 +45,10 @@ public class RecordManagerUtil {
         return recordManagerUtil;
     }
 
-    public void init(Activity activity, SurfaceView surfaceView) {
+
+    public void init(Activity activity, SurfaceView surfaceView,RecordEvent mRecordEvent) {
+        this.activity=activity;
+        this.mRecordEvent=mRecordEvent;
         mediaUtils = new MediaUtils(activity);
 
         mediaUtils.setRecorderType(MediaUtils.MEDIA_VIDEO);
@@ -48,10 +59,7 @@ public class RecordManagerUtil {
 
         mediaUtils.setSurfaceView(surfaceView);
 
-        mediaUtils.setTargetName(
-                "R_" + CountDownTimeTextUtil.nowTime().replace(':', '.')
-                        .replace(' ', '_') + "-" + System.currentTimeMillis() + ".mp4"
-        );
+        mediaUtils.setTargetName(targetName);
     }
 
     private String getTimeString(long timeLong) {
@@ -65,15 +73,38 @@ public class RecordManagerUtil {
         // 文件路径
         File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
         String dateTime = getTimeString(System.currentTimeMillis());
-        parentFile = new File(pathFile.getPath() + "/" + dateTime);
+        parentFile = new File(pathFile.getPath() + "/normal_storage/" + dateTime);
         if (parentFile.mkdirs()) {
             Timber.i("创建目录:" + parentFile.getPath());
         } else {
             Timber.i("创建目录:" + parentFile.getPath() + " 失败");
         }
-
-        String dateOldTime = getTimeString(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 7);
-        File parentOldFile = new File(pathFile.getPath() + "/" + dateOldTime);
+      if (ManagerFactory.getInstance().getFolderEntityManager(activity).queryBuilder().where(FolderEntityDao.Properties.FolderPath.eq(parentFile.getPath())).build().list().size()<=0){
+          ManagerFactory.getInstance().getFolderEntityManager(activity).save(new FolderEntity(parentFile.getPath(),System.currentTimeMillis()));
+        }
+        FolderEntity folderEntity=     ManagerFactory.getInstance().getFolderEntityManager(activity).queryBuilder().where(FolderEntityDao.Properties.FolderPath.eq(parentFile.getPath())).build().unique();
+        targetName= "Dashcam001-" + nowTime().replace(':', '.').replace(' ', '_') + "-" + System.currentTimeMillis() + ".mp4";
+        Timber.i("创建文件:" + targetName);
+        ManagerFactory.getInstance().getFileEntityManager(activity).save(new FileEntity(targetName,System.currentTimeMillis(),  folderEntity.getId(),folderEntity.getId()));
+       long i= (long) (MediaUtil.INSTANCE. getSDAllSize()*0.05)/1024;
+        long remaining= MediaUtil.INSTANCE. getSDFreeSize()/1024;
+       if (remaining-i<=200){
+           File deleteFile=null;
+        List<FolderEntity> folderEntityList= ManagerFactory.getInstance().getFolderEntityManager(activity).queryBuilder().orderAsc(FolderEntityDao.Properties.AddTime).list();
+        if (folderEntityList.size()>0){
+            deleteFile= new File(folderEntityList.get(0).getFolderPath()+folderEntityList.get(0).getFileEntities().get(0).getFilePath());
+        }
+        if (deleteFile!=null){
+            if (deleteFile.delete()){
+                ManagerFactory.getInstance().getFileEntityManager(activity).delete(folderEntityList.get(0).getFileEntities().get(0));
+                if (folderEntityList.get(0).getFileEntities().size()==1){
+                    ManagerFactory.getInstance().getFolderEntityManager(activity).delete(folderEntityList.get(0));
+                }
+            }
+        }
+       }
+       /* String dateOldTime = getTimeString(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 7);
+        File parentOldFile = new File( + "/" + dateOldTime);
         Timber.i("一个星期前时间文件夹:" + parentOldFile.getPath());
         if (parentOldFile.exists()) {
             if (deleteDirectory(parentOldFile.getPath())) {
@@ -83,7 +114,7 @@ public class RecordManagerUtil {
             }
         } else {
             Timber.i("不存在一个星期前的文件夹");
-        }
+        }*/
     }
 
     public void startRecord(int minute) {
@@ -101,17 +132,17 @@ public class RecordManagerUtil {
                 Timber.i("自动循环录制...");
 
                 mediaUtils.stopRecordSave();
-
+               if (mRecordEvent!=null){
+                   Timber.i("11文件:"+parentFile+"/"+targetName+"11------文件是否存在："+new File(parentFile+"/"+targetName).isFile());
+                   mRecordEvent.onComplete(parentFile,targetName);
+               }
                 Timber.i("自动循环录制保存成功");
 
                 initDate();
 
                 mediaUtils.setTargetDir(parentFile);
 
-                mediaUtils.setTargetName(
-                        "R_" + nowTime().replace(':', '.')
-                                .replace(' ', '_') + "-" + System.currentTimeMillis() + ".mp4"
-                );
+                mediaUtils.setTargetName(targetName);
 
                 mediaUtils.record();
 
@@ -128,6 +159,9 @@ public class RecordManagerUtil {
         mediaUtils.stopRecordSave();
         isRecording = mediaUtils.isRecording();
         startTime = 0;
+        if (mRecordEvent!=null){
+            mRecordEvent.onStop(parentFile,targetName);
+        }
     }
     public static String nowTime() {
         long time = System.currentTimeMillis();
@@ -203,5 +237,8 @@ public class RecordManagerUtil {
             return false;
         }
     }
-
+    public   interface  RecordEvent{
+        void onComplete(File parentFile,String targetName);
+        void onStop(File parentFile,String targetName);
+    }
 }

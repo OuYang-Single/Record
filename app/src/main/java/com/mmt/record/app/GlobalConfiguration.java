@@ -11,6 +11,7 @@ import com.jess.arms.http.log.RequestInterceptor;
 import com.jess.arms.integration.ConfigModule;
 import com.mmt.record.BuildConfig;
 import com.mmt.record.mvp.model.api.Api;
+import com.mmt.record.mvp.model.mvp.ui.Glide.PicassoImageLoaderStrategy;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -135,7 +136,12 @@ public final class GlobalConfiguration implements ConfigModule {
                     //否则请 return null;
                     return null;
                 });
+        builder.imageLoaderStrategy(new PicassoImageLoaderStrategy());
     }
+/*    @Override
+    public void applyOptions(Context context, GlobalConfigModule.Builder builder) {
+        builder.imageLoaderStrategy(new PicassoImageLoaderStrategy());
+    }*/
 
     @Override
     public void injectAppLifecycle(Context context, List<AppLifecycles> lifecycles) {

@@ -26,17 +26,18 @@ public class UserDao extends AbstractDao<User, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property UserId = new Property(1, String.class, "userId", false, "USER_ID");
-        public final static Property Username = new Property(2, String.class, "username", false, "USERNAME");
-        public final static Property Password = new Property(3, String.class, "password", false, "PASSWORD");
+        public final static Property UserName = new Property(2, String.class, "userName", false, "USER_NAME");
+        public final static Property PassWord = new Property(3, String.class, "passWord", false, "PASS_WORD");
         public final static Property Email = new Property(4, String.class, "email", false, "EMAIL");
         public final static Property Phone = new Property(5, String.class, "phone", false, "PHONE");
         public final static Property Question = new Property(6, String.class, "question", false, "QUESTION");
         public final static Property Avatar = new Property(7, String.class, "avatar", false, "AVATAR");
         public final static Property Answer = new Property(8, String.class, "answer", false, "ANSWER");
-        public final static Property Role = new Property(9, Integer.class, "role", false, "ROLE");
-        public final static Property CreateTime = new Property(10, long.class, "createTime", false, "CREATE_TIME");
-        public final static Property UpdateTime = new Property(11, long.class, "updateTime", false, "UPDATE_TIME");
-        public final static Property Token = new Property(12, String.class, "token", false, "TOKEN");
+        public final static Property ExpireTime = new Property(9, long.class, "expireTime", false, "EXPIRE_TIME");
+        public final static Property Role = new Property(10, Integer.class, "role", false, "ROLE");
+        public final static Property CreateTime = new Property(11, long.class, "createTime", false, "CREATE_TIME");
+        public final static Property UpdateTime = new Property(12, long.class, "updateTime", false, "UPDATE_TIME");
+        public final static Property Token = new Property(13, String.class, "token", false, "TOKEN");
     }
 
 
@@ -54,17 +55,18 @@ public class UserDao extends AbstractDao<User, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"USER\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY ," + // 0: id
                 "\"USER_ID\" TEXT," + // 1: userId
-                "\"USERNAME\" TEXT," + // 2: username
-                "\"PASSWORD\" TEXT," + // 3: password
+                "\"USER_NAME\" TEXT," + // 2: userName
+                "\"PASS_WORD\" TEXT," + // 3: passWord
                 "\"EMAIL\" TEXT," + // 4: email
                 "\"PHONE\" TEXT," + // 5: phone
                 "\"QUESTION\" TEXT," + // 6: question
                 "\"AVATAR\" TEXT," + // 7: avatar
                 "\"ANSWER\" TEXT," + // 8: answer
-                "\"ROLE\" INTEGER," + // 9: role
-                "\"CREATE_TIME\" INTEGER NOT NULL ," + // 10: createTime
-                "\"UPDATE_TIME\" INTEGER NOT NULL ," + // 11: updateTime
-                "\"TOKEN\" TEXT);"); // 12: token
+                "\"EXPIRE_TIME\" INTEGER NOT NULL ," + // 9: expireTime
+                "\"ROLE\" INTEGER," + // 10: role
+                "\"CREATE_TIME\" INTEGER NOT NULL ," + // 11: createTime
+                "\"UPDATE_TIME\" INTEGER NOT NULL ," + // 12: updateTime
+                "\"TOKEN\" TEXT);"); // 13: token
     }
 
     /** Drops the underlying database table. */
@@ -87,14 +89,14 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindString(2, userId);
         }
  
-        String username = entity.getUsername();
-        if (username != null) {
-            stmt.bindString(3, username);
+        String userName = entity.getUserName();
+        if (userName != null) {
+            stmt.bindString(3, userName);
         }
  
-        String password = entity.getPassword();
-        if (password != null) {
-            stmt.bindString(4, password);
+        String passWord = entity.getPassWord();
+        if (passWord != null) {
+            stmt.bindString(4, passWord);
         }
  
         String email = entity.getEmail();
@@ -121,17 +123,18 @@ public class UserDao extends AbstractDao<User, Long> {
         if (answer != null) {
             stmt.bindString(9, answer);
         }
+        stmt.bindLong(10, entity.getExpireTime());
  
         Integer role = entity.getRole();
         if (role != null) {
-            stmt.bindLong(10, role);
+            stmt.bindLong(11, role);
         }
-        stmt.bindLong(11, entity.getCreateTime());
-        stmt.bindLong(12, entity.getUpdateTime());
+        stmt.bindLong(12, entity.getCreateTime());
+        stmt.bindLong(13, entity.getUpdateTime());
  
         String token = entity.getToken();
         if (token != null) {
-            stmt.bindString(13, token);
+            stmt.bindString(14, token);
         }
     }
 
@@ -149,14 +152,14 @@ public class UserDao extends AbstractDao<User, Long> {
             stmt.bindString(2, userId);
         }
  
-        String username = entity.getUsername();
-        if (username != null) {
-            stmt.bindString(3, username);
+        String userName = entity.getUserName();
+        if (userName != null) {
+            stmt.bindString(3, userName);
         }
  
-        String password = entity.getPassword();
-        if (password != null) {
-            stmt.bindString(4, password);
+        String passWord = entity.getPassWord();
+        if (passWord != null) {
+            stmt.bindString(4, passWord);
         }
  
         String email = entity.getEmail();
@@ -183,17 +186,18 @@ public class UserDao extends AbstractDao<User, Long> {
         if (answer != null) {
             stmt.bindString(9, answer);
         }
+        stmt.bindLong(10, entity.getExpireTime());
  
         Integer role = entity.getRole();
         if (role != null) {
-            stmt.bindLong(10, role);
+            stmt.bindLong(11, role);
         }
-        stmt.bindLong(11, entity.getCreateTime());
-        stmt.bindLong(12, entity.getUpdateTime());
+        stmt.bindLong(12, entity.getCreateTime());
+        stmt.bindLong(13, entity.getUpdateTime());
  
         String token = entity.getToken();
         if (token != null) {
-            stmt.bindString(13, token);
+            stmt.bindString(14, token);
         }
     }
 
@@ -207,17 +211,18 @@ public class UserDao extends AbstractDao<User, Long> {
         User entity = new User( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // userId
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // username
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // password
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // userName
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // passWord
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // email
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // phone
             cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // question
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // avatar
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // answer
-            cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // role
-            cursor.getLong(offset + 10), // createTime
-            cursor.getLong(offset + 11), // updateTime
-            cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12) // token
+            cursor.getLong(offset + 9), // expireTime
+            cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10), // role
+            cursor.getLong(offset + 11), // createTime
+            cursor.getLong(offset + 12), // updateTime
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13) // token
         );
         return entity;
     }
@@ -226,17 +231,18 @@ public class UserDao extends AbstractDao<User, Long> {
     public void readEntity(Cursor cursor, User entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setUserId(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setUsername(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setPassword(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setUserName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setPassWord(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setEmail(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setPhone(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setQuestion(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setAvatar(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setAnswer(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setRole(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
-        entity.setCreateTime(cursor.getLong(offset + 10));
-        entity.setUpdateTime(cursor.getLong(offset + 11));
-        entity.setToken(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
+        entity.setExpireTime(cursor.getLong(offset + 9));
+        entity.setRole(cursor.isNull(offset + 10) ? null : cursor.getInt(offset + 10));
+        entity.setCreateTime(cursor.getLong(offset + 11));
+        entity.setUpdateTime(cursor.getLong(offset + 12));
+        entity.setToken(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
      }
     
     @Override

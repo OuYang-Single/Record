@@ -20,23 +20,36 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
+
+import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.Gson;
 import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.http.imageloader.ImageLoader;
 import com.jess.arms.integration.AppManager;
 import com.jess.arms.mvp.BasePresenter;
+import com.jess.arms.utils.DataHelper;
+import com.jess.arms.utils.RxLifecycleUtils;
 import com.mmt.record.R;
 import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.mvp.model.entity.Request;
 import com.mmt.record.mvp.model.entity.User;
 import com.mmt.record.mvp.model.mvp.contract.MainContract;
+import com.mmt.record.mvp.model.mvp.util.FileUtils;
 import com.mmt.record.mvp.model.mvp.util.ResourcesUtils;
+import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.Utils;
 
 
 import javax.inject.Inject;
-import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import me.jessyan.rxerrorhandler.core.RxErrorHandler;
+import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
+import me.jessyan.rxerrorhandler.handler.RetryWithDelay;
+import me.leefeng.promptlibrary.PromptDialog;
 
 
 @ActivityScope
@@ -78,14 +91,37 @@ public class MainPresenter extends BasePresenter<MainContract.Model, MainContrac
 
     public void login(String toString, String toString1) {
 
-            if (Utils.isMobileNO(toString)) {
+            if (!TextUtils.isEmpty(toString)) {
                 if (TextUtils.isEmpty(toString1)){
                     mRootView.showMessage(ResourcesUtils.getString(mApplication, R.string.code));
                 }else {
-                    User user=new User();
-                    user.setPassword(toString1);
-                    user.setPhone(toString);
-                    mManagerFactory.getStudentManager(mApplication).saveOrUpdate(user);
+                    toString1 = FileUtils.  stringToBase64(toString1);
+                    String finalToString = toString1;
+                    mModel.login(toString,toString1).subscribeOn(Schedulers.io())
+                            .retryWhen(new RetryWithDelay(0, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
+                            .doOnSubscribe(disposable -> {
+                                // mRootView.showLoading();
+                            })
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .doFinally(() -> {
+                                //  mRootView.hideLoading();
+                            })
+                            .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
+                            .subscribe(new ErrorHandleSubscriber<Request<User>>(mErrorHandler) {
+                                @Override
+                                public void onNext(Request<User> isUserExists) {
+                                    isUserExists.getData().setPassWord(finalToString);
+                                    isUserExists.getData().setUserName(toString);
+                                    mManagerFactory.getStudentManager(mApplication).saveOrUpdate(isUserExists.getData());
+                                    ARouter.getInstance().build(RoutingUtils.VIDEO_FILE_PATH).navigation();
+                                }
+
+                                @Override
+                                public void onError(Throwable t) {
+                                    Log.w("","");
+                                }
+                            });
+                   //
                 }
             } else {
                 mRootView.showMessage(ResourcesUtils.getString(mApplication, R.string.code_phono));

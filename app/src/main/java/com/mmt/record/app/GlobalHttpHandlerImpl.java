@@ -1,8 +1,24 @@
 package com.mmt.record.app;
 import android.content.Context;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jess.arms.http.GlobalHttpHandler;
+import com.jess.arms.utils.DataHelper;
+import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.mvp.model.api.Api;
+import com.mmt.record.mvp.model.entity.User;
+
+import java.io.IOException;
+import java.util.List;
+
+import okhttp3.Call;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
@@ -18,6 +34,7 @@ import okhttp3.Response;
  */
 public class GlobalHttpHandlerImpl implements GlobalHttpHandler {
     private Context context;
+    List<User> users;
     public GlobalHttpHandlerImpl(Context context) {
         this.context = context;
     }
@@ -49,11 +66,41 @@ public class GlobalHttpHandlerImpl implements GlobalHttpHandler {
     public Request onHttpRequestBefore(Interceptor.Chain chain, Request request) {
 
         Request.Builder builder= chain.request().newBuilder();
+        users= ManagerFactory.getInstance().getStudentManager(context).queryAll();
+        if (users.size()>0){
+
+            if (  users.get(0).getExpireTime()-System.currentTimeMillis()<=0) {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                RequestBody body = RequestBody.create(JSON, new Gson().toJson(users.get(0)));
+                Request requests = new Request.Builder()
+                        .url(Api.APP_DOMAIN+"/rest/login")
+                        .header("Content-Type","application/json")
+                        .post(body)
+                        .build();
+                final Call call = okHttpClient.newCall(requests);
+
+                Response execute=null;
+                try {
+                    execute=  call.execute();
+                    try {
+                        Gson gson=new Gson();
+                        com.mmt.record.mvp.model.entity.Request<User> userRequest=  gson.fromJson(execute.body().string(), new TypeToken< com.mmt.record.mvp.model.entity.Request<User>>() {}.getType());
+                        users.get(0).setToken(userRequest.getData().getToken());
+                        ManagerFactory.getInstance().getStudentManager(context).update(users);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            builder  .header("authToken", users.get(0).getToken());
+        }
 
 
-
-       return  builder   .build();
-
-
+        return  builder   .build();
     }
 }

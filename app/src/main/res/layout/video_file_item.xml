@@ -17,6 +17,7 @@
     <org.raphets.roundimageview.RoundImageView
         app:corner_radius="5dp"
         app:type="round"
+        android:background="@color/black"
         android:id="@+id/video_img"
         android:layout_width="match_parent"
         android:layout_height="120dp"
@@ -33,6 +34,7 @@
         android:layout_height="wrap_content"/>
 </LinearLayout>
     <ImageView
+        android:visibility="gone"
         android:id="@+id/img_type"
         android:layout_marginTop="10dp"
         android:layout_marginRight="10dp"

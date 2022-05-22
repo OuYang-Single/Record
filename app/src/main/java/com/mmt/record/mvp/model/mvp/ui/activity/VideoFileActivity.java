@@ -18,6 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.alibaba.android.arouter.facade.annotation.Route;
+import com.alibaba.android.arouter.launcher.ARouter;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.maps.MapsInitializer;
+import com.amap.api.navi.NaviSetting;
 import com.google.gson.Gson;
 import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.di.scope.ActivityScope;
@@ -32,6 +36,8 @@ import com.mmt.record.mvp.model.mvp.util.ACache;
 import com.mmt.record.mvp.model.mvp.util.DateUtil;
 import com.mmt.record.mvp.model.mvp.util.NetworkType;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
+import com.mmt.record.mvp.model.mvp.util.ToastUtils;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,61 +49,22 @@ import java.util.TimerTask;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import dagger.Provides;
+import me.leefeng.promptlibrary.PromptDialog;
 
 @Route(path = RoutingUtils.VIDEO_FILE_PATH)
 public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implements VideoFileContract.View{
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
-    @BindView(R.id.hourTv)
-    TextView hourTv;
-    @BindView(R.id.minuteTv)
-    TextView minuteTv;
-    @BindView(R.id.date)
-    TextView mDate;
-    @BindView(R.id.tv_no_network)
-    TextView tv_no_network;
     @BindView(R.id.ly_null_data)
     LinearLayout ly_null_data;
-    @BindView(R.id.img_network_type)
-    ImageView img_network_type;
     @Inject
     GridLayoutManager manager;
     @Inject
     VideoFileAdapter mVideoFileAdapter;
-
-    Timer timerTime;
-    Handler handler=new Handler(){
-        @Override
-        public void dispatchMessage(@NonNull Message msg) {
-            super.dispatchMessage(msg);
-            switch (msg.what){
-                case 0:
-                    Date date =new  Date();
-                    int hour;
-                    if (date.getHours() > 12) {
-                        hour =  date.getHours() - 12;
-                    } else {
-                        hour =  date.getHours();
-                    }
-                    if (hour < 10) {
-                        hourTv.setText("0"+hour);
-                    } else {
-                        hourTv.setText(hour+"");
-                    }
-                    if (date.getMinutes() < 10) {
-                        minuteTv.setText( "0" +date.getMinutes());
-                    } else {
-                        minuteTv.setText(date.getMinutes()+"");
-                    }
-                    mDate.setText(DateUtil.timeStamp2Date(System.currentTimeMillis()));
-                    break;
-                case 1:
-
-                    break;
-            }
-        }
-    };
+    @Inject
+    PromptDialog promptDialog;
 
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
@@ -116,42 +83,57 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
 
     @Override
     public void initData(@Nullable Bundle bundle) {
-        timerTime = new Timer();
-        handler.sendEmptyMessage(0);
-        timerTime.schedule(new  TimerTask() {
-            @Override
-            public void run() {
-                handler.sendEmptyMessage(0);
-            }
-        }, 1000, 1000);
+        initTime();
+        MapsInitializer.updatePrivacyShow(this,true,true);
+        AMapLocationClient.updatePrivacyShow(this,true,true);
+        MapsInitializer.updatePrivacyAgree(this,true);
+        AMapLocationClient.updatePrivacyAgree(this,true);
+        NaviSetting.updatePrivacyShow(this, true, true);
+        NaviSetting.updatePrivacyAgree(this, true);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mVideoFileAdapter);
         mPresenter.getVideos(handler);
+        showLoading();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mPresenter.onComplete();
+        mPresenter.gpsUploads(0);
     }
 
     @Override
     public void showMessage(@NonNull String s) {
-
-    }
-    @Override
-    public void onNetDisconnected() {
-        img_network_type.setImageResource(R.mipmap.ic_no_network);
-        tv_no_network.setVisibility(View.VISIBLE);
+        ToastUtils.makeText(this,s);
     }
 
     @Override
-    public void onNetConnected(NetworkType networkType) {
-        tv_no_network.setVisibility(View.GONE);
-        if (networkType.equals(NetworkType.NETWORK_WIFI) ) {
-            img_network_type.setImageResource(R.mipmap.ic_wifi);
-        } else {
-            img_network_type.setImageResource(R.mipmap.ic_move);
-        }
+    public void showLoading() {
+        promptDialog.showLoading(getString(R.string.loade));
+    }
 
+    @Override
+    public void hideLoading() {
+        promptDialog.dismiss();
     }
 
     @Override
     public Activity getActivity() {
         return this;
+    }
+
+    @Override
+    public void nullData() {
+        ly_null_data.setVisibility(View.VISIBLE);
+    }
+
+    @OnClick({R.id.labeled})
+    public void OnClick(View view){
+        switch (view.getId()){
+            case R.id.labeled:
+                ARouter.getInstance().build(RoutingUtils. RECORD_PATH).navigation();
+                break;
+        }
     }
 }

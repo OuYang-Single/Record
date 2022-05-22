@@ -23,7 +23,22 @@ android {
             abiFilters 'armeabi-v7a'
         }
     }
-
+    signingConfigs {
+        release {
+            //绝对路径和相对路径都可以
+            storeFile file("../key1.jks")
+            storePassword "record"
+            keyAlias "key0"
+            keyPassword "record"
+        }
+        debug {
+            //绝对路径和相对路径都可以
+            storeFile file("../key1.jks")
+            storePassword "record"
+            keyAlias "key0"
+            keyPassword "record"
+        }
+    }
     buildTypes {
         debug {
 
@@ -61,6 +76,11 @@ android {
         }
     }
 }
+configurations.all {
+    resolutionStrategy {
+        force 'com.github.bumptech.glide:glide:4.9.0'//强制指定的版本
+    }
+}
 
 dependencies {
 
@@ -71,6 +91,7 @@ dependencies {
     //view
     implementation rootProject.ext.dependencies["autosize"]
     implementation 'androidx.appcompat:appcompat:1.1.0'
+
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -110,5 +131,8 @@ dependencies {
     implementation 'com.moushao.tech:ffmpeg-4-android:1.0.1'
     implementation 'androidx.core:core-ktx:1.2.0'
     implementation 'org.raphets:roundimageview:1.2.0'
-    compile 'com.blankj:utilcode:1.3.4'
+    implementation 'com.blankj:utilcode:1.3.4'
+    implementation 'com.github.limxing:Android-PromptDialog:1.1.3'
+    implementation 'com.amap.api:location:latest.integration'
+    implementation 'com.amap.api:navi-3dmap:latest.integration'
 }

@@ -2,6 +2,10 @@ package com.mmt.record.mvp.model.api;
 
 
 
+import com.mmt.record.mvp.model.entity.GpsEntity;
+import com.mmt.record.mvp.model.entity.Request;
+import com.mmt.record.mvp.model.entity.User;
+
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +25,20 @@ import retrofit2.http.*;
  * ================================================
  */
 public interface Api {
-    String APP_DOMAIN = "http://8.888.38.88:3003/api/";
+    String APP_DOMAIN = "http://202.202.64.4:82";
 
+    @Headers({"Content-Type: application/json"})//需要添加
+    @POST("/rest/login")
+    Observable<Request<User>> login(@Body User mAuthorizationUser);
+
+    @Headers({"Content-Type: application/json"})//需要添加
+    @POST("/rest/gps/upload")
+    Observable<Request> gpsUpload(@Body GpsEntity gpsEntity);
+
+
+    @POST("/rest/file/upload")
+    @Multipart
+    Observable<Request> upload(@Part("device_id") RequestBody  params,@Part MultipartBody.Part  part);
 
 
 }

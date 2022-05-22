@@ -29,10 +29,12 @@ import com.mmt.record.mvp.model.di.component.DaggerMainComponent;
 import com.mmt.record.mvp.model.mvp.contract.MainContract;
 import com.mmt.record.mvp.model.mvp.presenter.MainPresenter;
 import com.mmt.record.mvp.model.mvp.util.HtmlUtil;
+import com.mmt.record.mvp.model.mvp.util.ToastUtils;
 
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import me.leefeng.promptlibrary.PromptDialog;
 
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
@@ -42,6 +44,8 @@ import static com.mmt.record.mvp.model.mvp.util.RoutingUtils.MAIN_PATH;
 import java.io.File;
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 @Route(path = MAIN_PATH)
 public class MainActivity extends BaseActivity<MainPresenter> implements MainContract.View {
     @BindView(R.id.customer)
@@ -50,6 +54,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     EditText input_phone_password;
     @BindView(R.id.input_code_password)
     EditText input_code_password;
+    @Inject
+    PromptDialog promptDialog;
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
         DaggerMainComponent //如找不到该类,请编译一下项目
@@ -77,7 +83,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     @Override
     public void showMessage(@NonNull String message) {
         checkNotNull(message);
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        ToastUtils.makeText(this,message);
     }
 
 
@@ -91,12 +97,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
 
     @Override
     public void showLoading() {
-
+        promptDialog.showLoading(getString(R.string.load));
     }
 
     @Override
     public void hideLoading() {
-
+        promptDialog.dismiss();
     }
 
     @OnClick({R.id.login_btn})
@@ -109,4 +115,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements MainCon
     }
 
 
+    @Override
+    public Activity getActivity() {
+        return this;
+    }
 }

@@ -7,8 +7,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.jess.arms.di.scope.ActivityScope;
 
+import com.jess.arms.http.imageloader.ImageLoader;
+import com.mmt.record.greendao.FileEntityManager;
+import com.mmt.record.greendao.GpsEntityManager;
+import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.VideoEntity;
 import com.mmt.record.mvp.model.entity.VideoInfo;
+import com.mmt.record.mvp.model.mvp.contract.MainContract;
+import com.mmt.record.mvp.model.mvp.contract.RecordContract;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.model.VideoFileModel;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
@@ -22,6 +29,7 @@ import java.util.List;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import me.leefeng.promptlibrary.PromptDialog;
 
 @Module
 public abstract class VideoFileModule {
@@ -38,14 +46,14 @@ public abstract class VideoFileModule {
 
     @ActivityScope
     @Provides
-    static VideoFileAdapter getVideoFileAdapter(List<VideoInfo> list) {
-        return new VideoFileAdapter(list);
+    static VideoFileAdapter getVideoFileAdapter(List<LocalMedia> list,ImageLoader mImageLoader) {
+        return new VideoFileAdapter(list,mImageLoader);
     }
     @ActivityScope
     @Provides
-    static List<VideoInfo> getVideoEntityList() {
+    static List<LocalMedia> getVideoEntityList() {
 
-        return new ArrayList<VideoInfo>();
+        return new ArrayList<LocalMedia>();
     }
 
     @ActivityScope
@@ -59,4 +67,17 @@ public abstract class VideoFileModule {
         return new RxPermissions((FragmentActivity) view.getActivity());
     }
 
+    @Provides
+    public static FileEntityManager getManagerFactory(VideoFileContract.View view) {
+        return ManagerFactory.getInstance().getFileEntityManager(view.getActivity());
+    }
+    @Provides
+    public static GpsEntityManager getGpsEntityManager(VideoFileContract.View view) {
+        return ManagerFactory.getInstance().getGpsEntityManager(view.getActivity());
+    }
+    @ActivityScope
+    @Provides
+    public static PromptDialog getPromptDialog(VideoFileContract.View view){
+        return new PromptDialog(view.getActivity());
+    }
 }

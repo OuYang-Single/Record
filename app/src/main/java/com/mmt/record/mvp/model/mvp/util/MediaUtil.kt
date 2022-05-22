@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
+import android.os.Environment
+import android.os.StatFs
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
@@ -217,7 +219,6 @@ object MediaUtil {
                     ).toString()
 
                 val info = VideoInfo("", mPath, mTitle, mDisplayName, mMimeType, mDuration, mSize, false)
-                Log.i("查看视频信息",  info.toString())
                 mVideoList.add(info)
             } while (cursor.moveToNext())
 
@@ -255,5 +256,35 @@ object MediaUtil {
                 .getString(actualImageColumnIndex)
         }
         return File(imgPath)
+    }
+
+     fun getSDFreeSize(): Long {
+        //取得SD卡文件路径
+        val path: File = Environment.getExternalStorageDirectory()
+        val sf = StatFs(path.path)
+        //获取单个数据块的大小(Byte)
+        val blockSize = sf.blockSize.toLong()
+        //空闲的数据块的数量
+        val freeBlocks = sf.availableBlocks.toLong()
+        //返回SD卡空闲大小
+        //return freeBlocks * blockSize;  //单位Byte
+        //return (freeBlocks * blockSize)/1024;   //单位KB
+        return freeBlocks * blockSize / 1024 //单位MB
+    }
+    /**
+     * 获取总容量
+     */
+     fun getSDAllSize(): Long {
+        //取得SD卡文件路径
+        val path = Environment.getExternalStorageDirectory()
+        val sf = StatFs(path.path)
+        //获取单个数据块的大小(Byte)
+        val blockSize = sf.blockSize.toLong()
+        //获取所有数据块数
+        val allBlocks = sf.blockCount.toLong()
+        //返回SD卡大小
+        //return allBlocks * blockSize; //单位Byte
+        //return (allBlocks * blockSize)/1024; //单位KB
+        return allBlocks * blockSize / 1024 //单位MB
     }
 }
