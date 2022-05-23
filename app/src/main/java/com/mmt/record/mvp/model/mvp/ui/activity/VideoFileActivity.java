@@ -1,15 +1,9 @@
 package com.mmt.record.mvp.model.mvp.ui.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.view.SurfaceView;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,9 +16,7 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.maps.MapsInitializer;
 import com.amap.api.navi.NaviSetting;
-import com.google.gson.Gson;
 import com.jess.arms.di.component.AppComponent;
-import com.jess.arms.di.scope.ActivityScope;
 import com.mmt.record.R;
 import com.mmt.record.app.BaseActivity;
 
@@ -32,25 +24,13 @@ import com.mmt.record.mvp.model.di.component.DaggerVideoFileComponent;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.presenter.VideoFilePresenter;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
-import com.mmt.record.mvp.model.mvp.util.ACache;
-import com.mmt.record.mvp.model.mvp.util.DateUtil;
-import com.mmt.record.mvp.model.mvp.util.NetworkType;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
-import com.tbruyelle.rxpermissions2.RxPermissions;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import dagger.Provides;
 import me.leefeng.promptlibrary.PromptDialog;
 
 @Route(path = RoutingUtils.VIDEO_FILE_PATH)
@@ -92,6 +72,26 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         NaviSetting.updatePrivacyAgree(this, true);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mVideoFileAdapter);
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if(!recyclerView.canScrollVertically(1)){
+
+                   mPresenter. loadMoreDate();
+                }
+
+
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+
+            }
+        });
+
         mPresenter.getVideos(handler);
         showLoading();
     }

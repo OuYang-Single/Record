@@ -2,10 +2,12 @@ package com.mmt.record.mvp.model.mvp.util;
 
 import android.app.Activity;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.SurfaceView;
 
 
 import com.deep.dpwork.util.CountDownTimeTextUtil;
+import com.mmt.record.greendao.FileEntityDao;
 import com.mmt.record.greendao.FolderEntityDao;
 import com.mmt.record.greendao.ManagerFactory;
 import com.mmt.record.mvp.model.entity.FileEntity;
@@ -69,7 +71,11 @@ public class RecordManagerUtil {
     }
 
     private void initDate() {
-
+        long i= (long) (MediaUtil.INSTANCE. getSDAllSize()*0.05)/1024;
+        long remaining= MediaUtil.INSTANCE. getSDFreeSize()/1024;
+        if (remaining-i<=400){
+            deleteFile();
+        }
         // 文件路径
         File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
         String dateTime = getTimeString(System.currentTimeMillis());
@@ -86,23 +92,7 @@ public class RecordManagerUtil {
         targetName= "Dashcam001-" + nowTime().replace(':', '.').replace(' ', '_') + "-" + System.currentTimeMillis() + ".mp4";
         Timber.i("创建文件:" + targetName);
         ManagerFactory.getInstance().getFileEntityManager(activity).save(new FileEntity(targetName,System.currentTimeMillis(),  folderEntity.getId(),folderEntity.getId()));
-       long i= (long) (MediaUtil.INSTANCE. getSDAllSize()*0.05)/1024;
-        long remaining= MediaUtil.INSTANCE. getSDFreeSize()/1024;
-       if (remaining-i<=200){
-           File deleteFile=null;
-        List<FolderEntity> folderEntityList= ManagerFactory.getInstance().getFolderEntityManager(activity).queryBuilder().orderAsc(FolderEntityDao.Properties.AddTime).list();
-        if (folderEntityList.size()>0){
-            deleteFile= new File(folderEntityList.get(0).getFolderPath()+folderEntityList.get(0).getFileEntities().get(0).getFilePath());
-        }
-        if (deleteFile!=null){
-            if (deleteFile.delete()){
-                ManagerFactory.getInstance().getFileEntityManager(activity).delete(folderEntityList.get(0).getFileEntities().get(0));
-                if (folderEntityList.get(0).getFileEntities().size()==1){
-                    ManagerFactory.getInstance().getFolderEntityManager(activity).delete(folderEntityList.get(0));
-                }
-            }
-        }
-       }
+
        /* String dateOldTime = getTimeString(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 7);
         File parentOldFile = new File( + "/" + dateOldTime);
         Timber.i("一个星期前时间文件夹:" + parentOldFile.getPath());
@@ -116,7 +106,29 @@ public class RecordManagerUtil {
             Timber.i("不存在一个星期前的文件夹");
         }*/
     }
+public void deleteFile(){
+    File deleteFile=null;
+    List<FolderEntity> folderEntityList= ManagerFactory.getInstance().getFolderEntityManager(activity).queryBuilder().orderAsc(FolderEntityDao.Properties.AddTime).list();
+    List<FileEntity> fileEntities=null;
+    if (folderEntityList.size()>0){
+        fileEntities=    ManagerFactory.getInstance().getFileEntityManager(activity).queryBuilder().where(FileEntityDao.Properties.FolderEntityId.eq(folderEntityList.get(0).getId())).orderAsc(FileEntityDao.Properties.AddTime).list();
+        if (fileEntities.size()>0){
+            deleteFile= new File(folderEntityList.get(0).getFolderPath()+"/"+fileEntities.get(0).getFilePath());
+        }
+    }
 
+    if (deleteFile!=null){
+
+        ManagerFactory.getInstance().getFileEntityManager(activity).deleteByKey(fileEntities.get(0).getId());
+        if (fileEntities.size()==1){
+            ManagerFactory.getInstance().getFolderEntityManager(activity).delete(folderEntityList.get(0));
+        }
+
+        if (!deleteFile.delete()){
+            deleteFile();
+        }
+    }
+}
     public void startRecord(int minute) {
         if (timer != null) {
             timer.cancel();

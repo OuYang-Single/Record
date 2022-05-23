@@ -121,12 +121,13 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
     }
 
 
-    public void Apply() {
+    public void Apply(int time) {
 
         requestPermission(new PermissionUtil.RequestPermission() {
                               @Override
                               public void onRequestPermissionSuccess() {
-                                  Observable.timer(500, TimeUnit.MILLISECONDS)
+
+                              Observable.timer(time, TimeUnit.MILLISECONDS)
                                           .subscribeOn(Schedulers.io())
                                           .observeOn(AndroidSchedulers.mainThread())
                                           .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
@@ -315,6 +316,7 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
 
     public void gpsUpload(File parentFile, String targetName) {
         if (location != null) {
+            try {
             FileEntity fileEntity = mFileEntityManager.queryBuilder().where(FileEntityDao.Properties.FilePath.eq(targetName)).build().unique();
             FolderEntity folderEntity = mFolderEntityManager.queryBuilder().where(FolderEntityDao.Properties.FolderPath.eq(parentFile)).build().unique();
             entity = new GpsEntity();
@@ -330,6 +332,7 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
             if (gpsEntities.size()>0){
               return;
             }
+
             mGpsEntityManager.save(entity);
 
             mModel.gpsUpload(entity).subscribeOn(Schedulers.io())
@@ -357,6 +360,9 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
                             Log.w("", "");
                         }
                     });
+            }catch (Exception ignored){
+
+            }
         }
     }
 

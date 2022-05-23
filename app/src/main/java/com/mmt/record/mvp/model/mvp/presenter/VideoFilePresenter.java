@@ -133,9 +133,12 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                     @Override
                     public void onComplete(List<LocalMediaFolder> result) {
                         Log.w("", "");
-                        mPosition = 0;
+
+                        if (localMediaFolders.size()>0){
+                            mPosition = result.get(0).getFolderTotalNum();
+                        }
                         VideoFilePresenter.this.  localMediaFolders=result;
-                        VideoFilePresenter.this.getLocalMedias(myHandler);
+                        VideoFilePresenter.this.getLocalMedias();
                     }
                 });
 
@@ -154,8 +157,9 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         //开线程初始化数据
     }
 
-    public void getLocalMedias(Handler myHandler) {
-        if (localMediaFolders.size() <= mPosition) {
+    public void getLocalMedias() {
+    
+        if (localMediaFolders.size()<=0){
             getVideoInfoList();
             mRootView.hideLoading();
             return;
@@ -272,5 +276,10 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         }
 
 
+    }
+
+    public void loadMoreDate() {
+        page++;
+        getLocalMedias();
     }
 }

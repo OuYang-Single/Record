@@ -104,7 +104,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
                     labeled.setText(" 开始录制");
                     RecordManagerUtil.getInstance().stopRecord();
                 }else {
-                    mPresenter.Apply();
+                    mPresenter.Apply(0);
                 }
                 break;
         }
@@ -113,7 +113,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     @Override
     public void onRequestPermissionSuccess() {
         if (!RecordManagerUtil.getInstance().isRecording){
-            RecordManagerUtil.getInstance().startRecord(1);
+            RecordManagerUtil.getInstance().startRecord(5);
             labeled.setText("停止录制");
             labeled.setVisibility(View.VISIBLE);
         }
@@ -163,7 +163,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         if (mMapView!=null){
             mMapView.onResume();
         }
-        mPresenter.Apply();
+        mPresenter.Apply(500);
     }
     @Override
     protected void onPause() {

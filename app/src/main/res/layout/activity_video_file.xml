@@ -5,54 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
+        android:visibility="gone"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <include layout="@layout/public_layout"/>
-
-
-    <FrameLayout
-        android:layout_marginLeft="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-        <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/ly_null_data"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <ImageView
-                android:src="@mipmap/ic_null_data"
-                android:layout_width="150dp"
-                android:layout_height="150dp"/>
-            <TextView
-                android:textColor="#9EADDF"
-                android:layout_marginTop="30dp"
-                android:text="暂无数据"
-                android:textSize="20dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-    </FrameLayout>
 
 
 </LinearLayout>
-    <TextView
-        android:id="@+id/tv_no_network"
-        android:text="当前网络异常！！！"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:textColor="#BAFF4040"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+
 
     <com.hjq.shape.view.ShapeTextView
+        android:visibility="gone"
         android:id="@+id/labeled"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -65,5 +28,241 @@
         android:textSize="18sp"
         app:shape="oval"
         app:shape_solidColor="#F44336" />
+    <LinearLayout
 
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+          android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+
+       <TextView
+           android:textStyle="bold"
+           android:textSize="30sp"
+           android:textColor="@color/black"
+           android:text="当前网络状态：WIFI"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"/>
+
+
+            <LinearLayout
+                android:id="@+id/password_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <com.hjq.shape.layout.ShapeLinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:paddingLeft="18dp"
+                    android:textColor="@android:color/black"
+                    app:shape="rectangle"
+                    app:shape_radius="9dp"
+                    app:shape_strokeColor="#F0F0F0"
+                    app:shape_strokeWidth="1dp">
+
+
+                    <EditText
+                        android:id="@+id/input_phone_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_weight="1"
+                        android:hint="用户名"
+                        android:background="@null"
+                        android:maxLength="11"
+                        android:textColor="#000000"
+                        android:textColorHint="#000000"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+
+                </com.hjq.shape.layout.ShapeLinearLayout>
+
+
+                <com.hjq.shape.layout.ShapeLinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="18dp"
+                    android:textColor="@android:color/black"
+                    app:shape="rectangle"
+                    app:shape_radius="9dp"
+                    app:shape_strokeColor="#F0F0F0"
+                    app:shape_strokeWidth="1dp">
+
+
+                    <EditText
+                        android:id="@+id/input_code_password"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="密码"
+                        android:inputType="textPassword"
+                        android:maxLength="11"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:textColor="#ff95a0b6"
+                        android:textColorHint="#ff95a0b6"
+                        android:textSize="22sp" />
+
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/close_eyes"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginRight="21dp"
+                        android:src="@mipmap/ic_close_eyes" />
+                </com.hjq.shape.layout.ShapeLinearLayout>
+                <com.hjq.shape.view.ShapeTextView
+                    android:id="@+id/login_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:text="登录"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    app:shape="rectangle"
+                    app:shape_radius="9dp"
+                    app:shape_solidColor="#009688" />
+<LinearLayout
+    android:layout_marginTop="30dp"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.hjq.shape.view.ShapeTextView
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="模拟\n模式"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        app:shape="rectangle"
+        app:shape_radius="5dp"
+        app:shape_solidColor="#009688" />
+
+    <com.hjq.shape.view.ShapeTextView
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="专业\n模式"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        app:shape="rectangle"
+        app:shape_radius="5dp"
+        app:shape_solidColor="#009688" />
+</LinearLayout>
+            </LinearLayout>
+
+
+        </LinearLayout>
+        <FrameLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                   <ImageView
+                       android:layout_gravity="left"
+                       android:padding="10dp"
+                       android:id="@+id/image_break"
+                       android:src="@mipmap/break_icon"
+                       android:layout_width="50dp"
+                       android:layout_height="50dp"/>
+                    <TextView
+                        android:layout_gravity="center"
+                        android:textStyle="bold"
+                        android:textSize="30sp"
+                        android:textColor="@color/black"
+                        android:text="视频文件管理"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+
+                </LinearLayout>
+                <FrameLayout
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_marginTop="10dp"
+                        android:id="@+id/recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_marginTop="10dp"
+                        android:id="@+id/recyclerViews"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/ly_null_data"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:src="@mipmap/ic_null_data"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"/>
+                <TextView
+                    android:textColor="#9EADDF"
+                    android:layout_marginTop="30dp"
+                    android:text="暂无数据"
+                    android:textSize="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </FrameLayout>
+        <include layout="@layout/public_layout"/>
+    </LinearLayout>
+    <TextView  android:visibility="gone"
+        android:id="@+id/tv_no_network"
+        android:text="当前网络异常！！！"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#BAFF4040"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </FrameLayout>

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginLeft="20dp"
-    android:gravity="center"
+    android:layout_marginRight="20dp"
+    android:layout_gravity="right"
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <TextView
@@ -27,7 +29,10 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/date_hour"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -63,10 +68,72 @@
 
     </LinearLayout>
     <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/date_hour"
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/black"
         android:textSize="30sp"
         android:textStyle="bold" />
-</LinearLayout>
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/date"
+        android:id="@+id/date_"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="尊敬的用户"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="visitor01"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="欢迎使用捷安\n行车记录仪"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <com.hjq.shape.view.ShapeTextView
+        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:padding="30dp"
+        android:text="开始\n录制"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"
+        app:shape="rectangle"
+        app:shape_radius="9dp"
+        app:shape_solidColor="#009688" />
+</RelativeLayout>
