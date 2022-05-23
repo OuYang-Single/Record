@@ -13,6 +13,7 @@ import com.mmt.record.mvp.model.api.Api;
 import com.mmt.record.mvp.model.entity.FileEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
 import com.mmt.record.mvp.model.entity.Request;
+import com.mmt.record.mvp.model.entity.User;
 import com.mmt.record.mvp.model.mvp.contract.RecordContract;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.util.FileUtils;
@@ -78,6 +79,22 @@ public class VideoFileModel extends BaseModel implements VideoFileContract.Model
                 .flatMap(new Function<Observable<Request>, ObservableSource<Request>>() {
                     @Override
                     public ObservableSource<Request> apply(@NonNull Observable<Request> listObservable) throws Exception {
+                        return listObservable;
+                    }
+                });
+    }
+    @Override
+    public Observable<Request<User>> login(String name, String password) {
+
+        User user=new User();
+        user.setUserName(name);
+        user.setPassWord(password);
+        return Observable.just(mRepositoryManager
+                .obtainRetrofitService(Api.class)
+                .login(user))
+                .flatMap(new Function<Observable<Request<User>>, ObservableSource<Request<User>>>() {
+                    @Override
+                    public ObservableSource<Request<User>> apply(@NonNull Observable<Request<User>> listObservable) throws Exception {
                         return listObservable;
                     }
                 });

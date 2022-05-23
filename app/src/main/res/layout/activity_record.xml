@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <include layout="@layout/public_layout"/>
+
         <FrameLayout
-            android:layout_marginLeft="20dp"
+            android:layout_weight="1"
             android:id="@+id/videoContentLayout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             >
 
@@ -33,6 +34,7 @@
             </LinearLayout>
 
         </FrameLayout>
+        <include layout="@layout/public_layout"/>
     </LinearLayout>
 
     <TextView

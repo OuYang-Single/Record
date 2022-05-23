@@ -44,10 +44,10 @@
             android:layout_height="match_parent">
 
        <TextView
+           android:id="@+id/network"
            android:textStyle="bold"
            android:textSize="30sp"
            android:textColor="@color/black"
-           android:text="当前网络状态：WIFI"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"/>
 
@@ -62,6 +62,7 @@
                 <com.hjq.shape.layout.ShapeLinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="80dp"
+                    android:id="@+id/phone_password"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:gravity="center_vertical"
@@ -95,6 +96,7 @@
 
                 <com.hjq.shape.layout.ShapeLinearLayout
                     android:layout_width="match_parent"
+                    android:id="@+id/code_password"
                     android:layout_height="80dp"
                     android:layout_marginTop="25dp"
                     android:layout_marginBottom="10dp"

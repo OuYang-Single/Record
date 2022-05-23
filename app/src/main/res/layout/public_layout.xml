@@ -122,14 +122,16 @@
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
+
     <com.hjq.shape.view.ShapeTextView
-        android:layout_centerInParent="true"
-        android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
         android:layout_marginBottom="20dp"
+        android:gravity="center"
         android:padding="30dp"
+        android:id="@+id/labeleds"
         android:text="开始\n录制"
         android:textColor="@android:color/white"
         android:textSize="30sp"

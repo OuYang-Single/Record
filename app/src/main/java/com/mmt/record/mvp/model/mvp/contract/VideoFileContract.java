@@ -8,6 +8,7 @@ import com.jess.arms.mvp.IView;
 import com.mmt.record.mvp.model.entity.FileEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
 import com.mmt.record.mvp.model.entity.Request;
+import com.mmt.record.mvp.model.entity.User;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ public interface VideoFileContract {
         Activity getActivity();
 
         void nullData();
+
+        void setLogInUi(int visible);
     }
 
     interface Model extends IModel {
@@ -27,5 +30,6 @@ public interface VideoFileContract {
         Observable<Observable<Request>> onComplete(List<FileEntity> fileEntities);
 
         Observable<Request> gpsUpload(GpsEntity gpsEntity);
+        Observable<Request<User>> login(String name, String password);
     }
 }

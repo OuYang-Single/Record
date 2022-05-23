@@ -11,6 +11,7 @@ import com.jess.arms.http.imageloader.ImageLoader;
 import com.mmt.record.greendao.FileEntityManager;
 import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.VideoEntity;
 import com.mmt.record.mvp.model.entity.VideoInfo;
@@ -18,6 +19,7 @@ import com.mmt.record.mvp.model.mvp.contract.MainContract;
 import com.mmt.record.mvp.model.mvp.contract.RecordContract;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.model.VideoFileModel;
+import com.mmt.record.mvp.model.mvp.ui.activity.StartActivity;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
 import com.mmt.record.mvp.model.mvp.util.ACache;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -41,7 +43,7 @@ public abstract class VideoFileModule {
     @ActivityScope
     @Provides
     static GridLayoutManager getGridLayoutManager(VideoFileContract.View view) {
-        return new GridLayoutManager(view.getActivity(), 4);
+        return new GridLayoutManager(view.getActivity(), 3);
     }
 
     @ActivityScope
@@ -67,6 +69,10 @@ public abstract class VideoFileModule {
         return new RxPermissions((FragmentActivity) view.getActivity());
     }
 
+    @Provides
+    public static UserManager getUserManager(VideoFileContract.View view) {
+        return ManagerFactory.getInstance().getStudentManager(view.getActivity());
+    }
     @Provides
     public static FileEntityManager getManagerFactory(VideoFileContract.View view) {
         return ManagerFactory.getInstance().getFileEntityManager(view.getActivity());

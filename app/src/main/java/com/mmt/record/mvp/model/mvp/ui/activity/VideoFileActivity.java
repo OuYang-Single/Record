@@ -3,7 +3,9 @@ package com.mmt.record.mvp.model.mvp.ui.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,14 +18,18 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.maps.MapsInitializer;
 import com.amap.api.navi.NaviSetting;
+import com.hjq.shape.layout.ShapeLinearLayout;
+import com.hjq.shape.view.ShapeTextView;
 import com.jess.arms.di.component.AppComponent;
 import com.mmt.record.R;
 import com.mmt.record.app.BaseActivity;
 
+import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.di.component.DaggerVideoFileComponent;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.presenter.VideoFilePresenter;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
+import com.mmt.record.mvp.model.mvp.util.NetworkType;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
 
@@ -39,8 +45,21 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
     RecyclerView mRecyclerView;
     @BindView(R.id.ly_null_data)
     LinearLayout ly_null_data;
+    @BindView(R.id.network)
+    TextView network;
+    @BindView(R.id.phone_password)
+    ShapeLinearLayout phone_password;
+    @BindView(R.id.code_password)
+    ShapeLinearLayout code_password;
+    @BindView(R.id.input_phone_password)
+    EditText input_phone_password;
+    @BindView(R.id.input_code_password)
+    EditText input_code_password;
+    @BindView(R.id.login_btn)
+    ShapeTextView login_btn;
     @Inject
     GridLayoutManager manager;
+
     @Inject
     VideoFileAdapter mVideoFileAdapter;
     @Inject
@@ -56,6 +75,7 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
                 .inject(this);
     }
 
+
     @Override
     public int initView(@Nullable Bundle bundle) {
         return R.layout.activity_video_file;
@@ -63,6 +83,7 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
 
     @Override
     public void initData(@Nullable Bundle bundle) {
+        mPresenter.isLogIn();
         initTime();
         MapsInitializer.updatePrivacyShow(this,true,true);
         AMapLocationClient.updatePrivacyShow(this,true,true);
@@ -128,12 +149,45 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         ly_null_data.setVisibility(View.VISIBLE);
     }
 
-    @OnClick({R.id.labeled})
+    @Override
+    public void setLogInUi(int visible) {
+        phone_password.setVisibility(visible);
+        code_password.setVisibility(visible);
+        if (visible==View.GONE){
+            login_btn.setText("注销");
+        }else {
+            login_btn.setText("登录");
+        }
+    }
+
+    @OnClick({R.id.labeleds,R.id.login_btn})
     public void OnClick(View view){
         switch (view.getId()){
-            case R.id.labeled:
+            case R.id.labeleds:
                 ARouter.getInstance().build(RoutingUtils. RECORD_PATH).navigation();
                 break;
+            case R.id.login_btn:
+                if ("注销".equals(login_btn.getText().toString())){
+                    mPresenter.logout();
+                }else {
+                    mPresenter.login(input_phone_password.getText().toString(),input_code_password.getText().toString());
+                }
+
+                break;
         }
+    }
+
+    @Override
+    public void onNetDisconnected() {
+        super.onNetDisconnected();
+        network.setText("当前网络状态：无网络");
+    }
+
+    @Override
+    public void onNetConnected(NetworkType networkType) {
+        super.onNetConnected(networkType);
+
+        network.setText("当前网络状态："+networkType.name());
+
     }
 }

@@ -15,9 +15,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
-import com.blankj.utilcode.utils.FileUtils;
+import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.Gson;
 import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.http.imageloader.ImageLoader;
@@ -27,15 +29,18 @@ import com.jess.arms.utils.PermissionUtil;
 import com.jess.arms.utils.RxLifecycleUtils;
 
 
+import com.mmt.record.R;
 import com.mmt.record.greendao.FileEntityDao;
 import com.mmt.record.greendao.FileEntityManager;
 import com.mmt.record.greendao.GpsEntityDao;
 import com.mmt.record.greendao.GpsEntityManager;
+import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.entity.FileEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.LocalMediaFolder;
 import com.mmt.record.mvp.model.entity.Request;
+import com.mmt.record.mvp.model.entity.User;
 import com.mmt.record.mvp.model.entity.VideoInfo;
 import com.mmt.record.mvp.model.mvp.config.SelectMimeType;
 import com.mmt.record.mvp.model.mvp.contract.OnQueryAllAlbumListener;
@@ -47,7 +52,10 @@ import com.mmt.record.mvp.model.mvp.loader.PictureSelector;
 import com.mmt.record.mvp.model.mvp.model.RecordModel;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
 import com.mmt.record.mvp.model.mvp.util.ACache;
+import com.mmt.record.mvp.model.mvp.util.FileUtils;
 import com.mmt.record.mvp.model.mvp.util.MediaUtil;
+import com.mmt.record.mvp.model.mvp.util.ResourcesUtils;
+import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 
@@ -94,6 +102,8 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     @Inject
     GpsEntityManager mGpsEntityManager;
     IBridgeMediaLoader loader;
+    @Inject
+    UserManager mUserManager;
     int mPosition = 1;
 
     List<LocalMediaFolder> localMediaFolders=new ArrayList<>();
@@ -281,5 +291,55 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     public void loadMoreDate() {
         page++;
         getLocalMedias();
+    }
+
+    public void isLogIn() {
+        if (mUserManager.queryAll().size()>0) {
+         mRootView.setLogInUi(View.GONE);
+        }else {
+            mRootView.setLogInUi(View.VISIBLE);
+        }
+    }
+    public void login(String toString, String toString1) {
+        if (!TextUtils.isEmpty(toString)) {
+            if (TextUtils.isEmpty(toString1)){
+                mRootView.showMessage(ResourcesUtils.getString(mApplication, R.string.code));
+            }else {
+                toString1 = FileUtils.  stringToBase64(toString1);
+                String finalToString = toString1;
+                mModel.login(toString,toString1).subscribeOn(Schedulers.io())
+                        .retryWhen(new RetryWithDelay(0, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
+                        .doOnSubscribe(disposable -> {
+                            // mRootView.showLoading();
+                        })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doFinally(() -> {
+                            //  mRootView.hideLoading();
+                        })
+                        .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
+                        .subscribe(new ErrorHandleSubscriber<Request<User>>(mErrorHandler) {
+                            @Override
+                            public void onNext(Request<User> isUserExists) {
+                                isUserExists.getData().setPassWord(finalToString);
+                                isUserExists.getData().setUserName(toString);
+                                mUserManager.saveOrUpdate(isUserExists.getData());
+
+                            }
+
+                            @Override
+                            public void onError(Throwable t) {
+                                Log.w("","");
+                            }
+                        });
+                //
+            }
+        } else {
+            mRootView.showMessage(ResourcesUtils.getString(mApplication, R.string.code_phono));
+        }
+    }
+
+    public void logout() {
+        mUserManager.deleteAll();
+        isLogIn();
     }
 }
