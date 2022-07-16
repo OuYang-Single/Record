@@ -14,6 +14,7 @@ import com.mmt.record.mvp.model.mvp.contract.OnQueryAlbumListener;
 import com.mmt.record.mvp.model.mvp.contract.OnQueryAllAlbumListener;
 import com.mmt.record.mvp.model.mvp.contract.OnQueryDataResultListener;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -81,7 +82,14 @@ public class IBridgeMediaLoader {
     public void loadPageMediaData(long bucketId, int page, int pageSize, OnQueryDataResultListener<LocalMedia> query) {
 
     }
+    /**
+     * Query the data in a bucket ID directory
+     *
+     * @param query
+     */
+    public void loadPageMediaDatas(Long file, OnQueryDataResultListener<LocalMedia> query) {
 
+    }
     /**
      * Queries for data in the specified directory (page)
      *

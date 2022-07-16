@@ -13,7 +13,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +25,7 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.deep.dpwork.util.CountDownTimeTextUtil;
 import com.deep.dpwork.util.DisplayUtil;
 import com.github.florent37.viewanimator.ViewAnimator;
 import com.hjq.shape.view.ShapeTextView;
@@ -36,6 +39,7 @@ import com.mmt.record.mvp.model.mvp.contract.RegisterContract;
 import com.mmt.record.mvp.model.mvp.presenter.RecordPresenter;
 import com.mmt.record.mvp.model.mvp.presenter.RegisterPresenter;
 import com.mmt.record.mvp.model.mvp.util.DateUtil;
+import com.mmt.record.mvp.model.mvp.util.FileSaveUtils;
 import com.mmt.record.mvp.model.mvp.util.RecordManagerUtil;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
@@ -44,6 +48,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 import java.io.File;
 import java.util.Date;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.inject.Inject;
 
@@ -54,11 +59,36 @@ import butterknife.OnClick;
 public class RecordActivity extends BaseActivity<RecordPresenter> implements RecordContract.View, RecordManagerUtil.RecordEvent {
     @BindView(R.id.mainSurfaceView)
     SurfaceView mainSurfaceView;
-    @BindView(R.id.labeled)
-    ShapeTextView labeled;
+
     @BindView(R.id.map)
     MapView mMapView ;
-
+    @BindView(R.id.recordImg)
+    ImageView recordImg ;
+    @BindView(R.id.labeleds)
+    TextView labeleds ;
+    @BindView(R.id.timeTv)
+    TextView timeTv ;
+    @BindView(R.id.user_name)
+    TextView user_name;
+    Timer   timer;
+    public Handler handlers=new Handler(){
+        @Override
+        public void dispatchMessage(@NonNull Message msg) {
+            super.dispatchMessage(msg);
+            switch (msg.what){
+                case 0:
+                    if (RecordManagerUtil.getInstance().isRecording) {
+                       // timeTv.text = "录制中"
+                        timeTv.setText (CountDownTimeTextUtil.getTimerString(System.currentTimeMillis() - startTime).toString());
+                    } else {
+                        //luZhiTv.text = "录制已停止"
+                        timeTv.setText("00:00:00");
+                    }
+                    break;
+            }
+        }
+    };
+    private long   startTime= 0;
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
         DaggerRecordComponent //如找不到该类,请编译一下项目
@@ -84,28 +114,45 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     @Override
     public void initData(@Nullable Bundle bundle) {
         initTime();
-        RecordManagerUtil.getInstance().init(this, mainSurfaceView,this);
+        mPresenter.isLogIn();
 
+        RecordManagerUtil.getInstance().init(this, mainSurfaceView,this);
+        labeleds.setText("停止录制");
         mMapView.onCreate(bundle);
+
+        ViewAnimator.animate(recordImg).alpha(0f, 1f, 0f).repeatCount(-1).duration(1000).start();
     }
 
-
+    public void initTime() {
+        timer = new Timer();
+        handler.sendEmptyMessage(0);
+        timer.schedule(new  TimerTask() {
+            @Override
+            public void run() {
+                handlers.sendEmptyMessage(0);
+            }
+        }, 1000, 1000);
+    }
 
     @Override
     public void showMessage(@NonNull String s) {
         ToastUtils.makeText(this,s);
     }
 
-    @OnClick({R.id.labeled})
+    @OnClick({R.id.labeleds,R.id.backs,R.id.back})
     public void OnClick(View view){
         switch (view.getId()){
-            case R.id.labeled:
+            case R.id.labeleds:
                 if (RecordManagerUtil.getInstance().isRecording){
-                    labeled.setText(" 开始录制");
+                    labeleds.setText("开始录制");
                     RecordManagerUtil.getInstance().stopRecord();
                 }else {
                     mPresenter.Apply(0);
                 }
+                break;
+            case R.id.backs:
+            case R.id.back:
+                finish();
                 break;
         }
     }
@@ -113,13 +160,15 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     @Override
     public void onRequestPermissionSuccess() {
         if (!RecordManagerUtil.getInstance().isRecording){
+            startTime= System.currentTimeMillis();
             RecordManagerUtil.getInstance().startRecord(5);
-            labeled.setText("停止录制");
-            labeled.setVisibility(View.VISIBLE);
+            labeleds.setText("停止录制");
         }
+
         mPresenter.Location(mMapView);
         mPresenter.onComplete();
         mPresenter.gpsUploads(0);
+        anInt=0;
     }
 
     @Override
@@ -127,17 +176,34 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         return this;
     }
 
+    @Override
+    public void setUserName(String userName) {
+        user_name.setText(userName);
+    }
 
 
     @Override
     public void onComplete(File parentFile, String targetName) {
         mPresenter.onComplete(parentFile,targetName);
-        mPresenter.gpsUpload(parentFile,targetName);
+        mPresenter.gpsUpload(parentFile,targetName,false);
     }
 
     @Override
     public void onStop(File parentFile, String targetName) {
-        mPresenter.gpsUpload(parentFile,targetName);
+        if (targetName==null){
+        return;
+        }
+        try {
+            Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
+            FileSaveUtils.INSTANCE.saveVideo(this,new File(parentFile+"/"+targetName));
+        }catch (Exception e){
+
+        }
+
+        if (anInt==0){
+            mPresenter.onComplete(parentFile,targetName);
+        }
+        mPresenter.gpsUpload(parentFile,targetName, anInt != 0);
     }
     @Override
     protected void onDestroy() {
@@ -147,7 +213,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         if (mMapView!=null){
             mMapView.onDestroy();
         }
-
+        timer.cancel();
     }
 
     @Override
@@ -165,6 +231,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         }
         mPresenter.Apply(500);
     }
+    int anInt=0;
     @Override
     protected void onPause() {
         super.onPause();
@@ -172,6 +239,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         if (mMapView!=null){
             mMapView.onPause();
         }
+        anInt=1;
         RecordManagerUtil.getInstance().stopRecord();
     }
     @Override

@@ -102,18 +102,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="尊敬的用户"
+            android:textColor="#000000"
             android:textSize="30sp"
             android:textStyle="bold" />
 
         <TextView
+            android:textColor="#000000"
+            android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="visitor01"
+            android:layout_marginTop="2dp"
+            android:text=""
             android:textSize="30sp"
             android:textStyle="bold" />
 
         <TextView
+            android:textColor="#000000"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -124,6 +128,7 @@
     </LinearLayout>
 
     <com.hjq.shape.view.ShapeTextView
+        android:id="@+id/labeleds"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -131,7 +136,6 @@
         android:layout_marginBottom="20dp"
         android:gravity="center"
         android:padding="30dp"
-        android:id="@+id/labeleds"
         android:text="开始\n录制"
         android:textColor="@android:color/white"
         android:textSize="30sp"

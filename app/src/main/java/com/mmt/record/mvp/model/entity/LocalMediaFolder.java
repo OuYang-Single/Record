@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.mmt.record.mvp.model.mvp.config.PictureConfig;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -24,6 +25,7 @@ public class LocalMediaFolder implements Parcelable {
      * folder name
      */
     private String folderName;
+    private File fide;
     /**
      * folder first path
      */
@@ -181,5 +183,13 @@ public class LocalMediaFolder implements Parcelable {
 
     public void setFirstMimeType(String firstMimeType) {
         this.firstMimeType = firstMimeType;
+    }
+
+    public File getFide() {
+        return fide;
+    }
+
+    public void setFide(File fide) {
+        this.fide = fide;
     }
 }

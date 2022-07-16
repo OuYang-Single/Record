@@ -35,6 +35,8 @@ public abstract class BaseActivity<P extends IPresenter> extends com.jess.arms.b
     TextView tv_no_network;
     @BindView(R.id.img_network_type)
     ImageView img_network_type;
+    @BindView(R.id.date_)
+    TextView date_;
     Timer timerTime;
    public Handler handler=new Handler(){
         @Override
@@ -60,12 +62,7 @@ public abstract class BaseActivity<P extends IPresenter> extends com.jess.arms.b
                         minuteTv.setText(date.getMinutes()+"");
                     }
                     mDate.setText(DateUtil.timeStamp2Date(System.currentTimeMillis()));
-                    break;
-                case 1:
-                 if (mPresenter instanceof VideoFilePresenter){
-                     ((VideoFilePresenter)  mPresenter).getVideoInfoList();
-                 }
-
+                    date_.setText(DateUtil.getWeekDay(System.currentTimeMillis()));
                     break;
             }
         }
@@ -87,12 +84,13 @@ public abstract class BaseActivity<P extends IPresenter> extends com.jess.arms.b
                 handler.sendEmptyMessage(0);
             }
         }, 1000, 1000);
-
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        timerTime.cancel();
+        if (timerTime!=null){
+            timerTime.cancel();
+        }
         handler.removeMessages(0);
         NetStateChangeReceiver.unRegisterObserver(this);
         NetStateChangeReceiver. unRegisterReceiver(this);

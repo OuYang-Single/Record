@@ -9,6 +9,7 @@ import com.mmt.record.greendao.FileEntityManager;
 import com.mmt.record.greendao.FolderEntityManager;
 import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.mvp.contract.RecordContract;
 import com.mmt.record.mvp.model.mvp.contract.RegisterContract;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
@@ -30,7 +31,10 @@ public abstract class RecordModule {
     static RxPermissions provideRxPermissions(RecordContract.View view) {
         return new RxPermissions((FragmentActivity) view.getActivity());
     }
-
+    @Provides
+    public static UserManager getUserManager(RecordContract.View view) {
+        return ManagerFactory.getInstance().getStudentManager(view.getActivity());
+    }
     @Provides
     public static FileEntityManager getManagerFactory(RecordContract.View view) {
         return ManagerFactory.getInstance().getFileEntityManager(view.getActivity());

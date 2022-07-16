@@ -262,7 +262,7 @@ public class MediaUtils implements SurfaceHolder.Callback {
                 previewWidth = optimalSize.width;
                 previewHeight = optimalSize.height;
                 parameters.setPreviewSize(optimalSize.width, optimalSize.height);
-                profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+                profile = CamcorderProfile.get(CamcorderProfile.QUALITY_2160P);
                 // 这里是重点，分辨率和比特率
                 // 分辨率越大视频大小越大，比特率越大视频越清晰
                 // 清晰度由比特率决定，视频尺寸和像素量由分辨率决定

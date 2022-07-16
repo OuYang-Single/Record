@@ -20,9 +20,13 @@ public interface VideoFileContract {
 
         Activity getActivity();
 
-        void nullData();
+        void nullData(int visible);
 
-        void setLogInUi(int visible);
+        void setLogInUi(int visible,String userName,String password);
+
+        void setRecyclerViewUI(int visible);
+
+        void setUserName(String userName);
     }
 
     interface Model extends IModel {

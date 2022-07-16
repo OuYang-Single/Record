@@ -11,6 +11,7 @@ import android.location.Location;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.amap.api.location.AMapLocation;
@@ -37,6 +38,7 @@ import com.mmt.record.greendao.FolderEntityManager;
 import com.mmt.record.greendao.GpsEntityDao;
 import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.entity.FileEntity;
 import com.mmt.record.mvp.model.entity.FolderEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
@@ -97,7 +99,8 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
     MyLocationStyle myLocationStyle;
     Location location;
     GpsEntity entity = null;
-
+    @Inject
+    UserManager mUserManager;
     @Inject
     public RecordPresenter(RecordContract.Model model, RecordContract.View rootView) {
         super(model, rootView);
@@ -119,7 +122,14 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
         this.mImageLoader = null;
         this.mApplication = null;
     }
+    public void isLogIn() {
 
+        if (mUserManager.queryAll().size()>0) {
+            mRootView.setUserName(mUserManager.queryAll().get(0).getUserName());
+        }else {
+            mRootView.setUserName("");
+        }
+    }
 
     public void Apply(int time) {
 
@@ -314,7 +324,7 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
 
     }
 
-    public void gpsUpload(File parentFile, String targetName) {
+    public void gpsUpload(File parentFile, String targetName,boolean is) {
         if (location != null) {
             try {
             FileEntity fileEntity = mFileEntityManager.queryBuilder().where(FileEntityDao.Properties.FilePath.eq(targetName)).build().unique();
@@ -334,6 +344,9 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
             }
 
             mGpsEntityManager.save(entity);
+            if (is){
+                return;
+            }
 
             mModel.gpsUpload(entity).subscribeOn(Schedulers.io())
                     .retryWhen(new RetryWithDelay(0, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔

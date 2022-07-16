@@ -13,6 +13,7 @@ import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.ManagerFactory;
 import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.entity.LocalMedia;
+import com.mmt.record.mvp.model.entity.LocalMediaFolder;
 import com.mmt.record.mvp.model.entity.VideoEntity;
 import com.mmt.record.mvp.model.entity.VideoInfo;
 import com.mmt.record.mvp.model.mvp.contract.MainContract;
@@ -21,6 +22,7 @@ import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.model.VideoFileModel;
 import com.mmt.record.mvp.model.mvp.ui.activity.StartActivity;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
+import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapters;
 import com.mmt.record.mvp.model.mvp.util.ACache;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -43,7 +45,7 @@ public abstract class VideoFileModule {
     @ActivityScope
     @Provides
     static GridLayoutManager getGridLayoutManager(VideoFileContract.View view) {
-        return new GridLayoutManager(view.getActivity(), 3);
+        return new GridLayoutManager(view.getActivity(), 4);
     }
 
     @ActivityScope
@@ -51,6 +53,18 @@ public abstract class VideoFileModule {
     static VideoFileAdapter getVideoFileAdapter(List<LocalMedia> list,ImageLoader mImageLoader) {
         return new VideoFileAdapter(list,mImageLoader);
     }
+    @ActivityScope
+    @Provides
+    static VideoFileAdapters getVideoFileAdapters(List<LocalMediaFolder> list, ImageLoader mImageLoader) {
+        return new VideoFileAdapters(list,mImageLoader);
+    }
+    @ActivityScope
+    @Provides
+    static List<LocalMediaFolder> getLocalMediaFolder() {
+
+        return new ArrayList<LocalMediaFolder>();
+    }
+
     @ActivityScope
     @Provides
     static List<LocalMedia> getVideoEntityList() {

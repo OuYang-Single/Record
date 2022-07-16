@@ -19,6 +19,8 @@ public interface RecordContract {
         void onRequestPermissionSuccess();
 
         Activity getActivity();
+
+        void setUserName(String userName);
     }
 
     interface Model extends IModel {

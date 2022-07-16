@@ -55,13 +55,13 @@ public class RecordManagerUtil {
 
         mediaUtils.setRecorderType(MediaUtils.MEDIA_VIDEO);
 
-        initDate();
+       // initDate();
 
-        mediaUtils.setTargetDir(parentFile);
+       // mediaUtils.setTargetDir(parentFile);
 
         mediaUtils.setSurfaceView(surfaceView);
 
-        mediaUtils.setTargetName(targetName);
+       // mediaUtils.setTargetName(targetName);
     }
 
     private String getTimeString(long timeLong) {
@@ -136,6 +136,13 @@ public void deleteFile(){
         }
         timer = new Timer();
         startTime = System.currentTimeMillis();
+
+        initDate();
+
+        mediaUtils.setTargetDir(parentFile);
+
+        mediaUtils.setTargetName(targetName);
+
         mediaUtils.record();
         isRecording = mediaUtils.isRecording();
         timer.schedule(new TimerTask() {
@@ -168,12 +175,16 @@ public void deleteFile(){
             timer.cancel();
             timer = null;
         }
+        if (parentFile!=null){
         mediaUtils.stopRecordSave();
         isRecording = mediaUtils.isRecording();
         startTime = 0;
         if (mRecordEvent!=null){
             mRecordEvent.onStop(parentFile,targetName);
         }
+    }
+        parentFile=null;
+        targetName=null;
     }
     public static String nowTime() {
         long time = System.currentTimeMillis();

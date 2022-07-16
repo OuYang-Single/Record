@@ -2,6 +2,7 @@ package com.mmt.record.mvp.model.mvp.util;
 
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -22,6 +23,36 @@ public class DateUtil {
 
 
         return lastSignTime;
+    }
+
+    public static String getWeekDay(long seconds) {
+        Date date = new Date(seconds);
+        String Week = "";
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int wek = c.get(Calendar.DAY_OF_WEEK);
+        if (wek == 1) {
+            Week += "星期⽇";
+        }
+        if (wek == 2) {
+            Week += "星期⼀";
+        }
+        if (wek == 3) {
+            Week += "星期⼆";
+        }
+        if (wek == 4) {
+            Week += "星期三";
+        }
+        if (wek == 5) {
+            Week += "星期四";
+        }
+        if (wek == 6) {
+            Week += "星期五";
+        }
+        if (wek == 7) {
+            Week += "星期六";
+        }
+        return Week;
     }
 
 

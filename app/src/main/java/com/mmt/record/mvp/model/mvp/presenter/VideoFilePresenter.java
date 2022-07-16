@@ -51,6 +51,7 @@ import com.mmt.record.mvp.model.mvp.loader.IBridgeMediaLoader;
 import com.mmt.record.mvp.model.mvp.loader.PictureSelector;
 import com.mmt.record.mvp.model.mvp.model.RecordModel;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
+import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapters;
 import com.mmt.record.mvp.model.mvp.util.ACache;
 import com.mmt.record.mvp.model.mvp.util.FileUtils;
 import com.mmt.record.mvp.model.mvp.util.MediaUtil;
@@ -105,9 +106,14 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     @Inject
     UserManager mUserManager;
     int mPosition = 1;
-
+    @Inject
+    List<LocalMediaFolder> localMediaFolderList;
+    LocalMediaFolder localMediaFolder;
     List<LocalMediaFolder> localMediaFolders=new ArrayList<>();
-    public int page=0;
+    @Inject
+    VideoFileAdapters mVideoFileAdapters;
+    public int page=1;
+    long bucketId;
     @Inject
     public VideoFilePresenter(VideoFileContract.Model model, VideoFileContract.View rootView) {
         super(model, rootView);
@@ -131,24 +137,31 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     }
 
 
-    public void getVideos(Handler myHandler) {
+    public void getVideos() {
         requestPermission(new PermissionUtil.RequestPermission() {
             @Override
             public void onRequestPermissionSuccess() {
-                if (loader == null) {
-                    loader = PictureSelector.create(mRootView.getActivity())
-                            .dataSource(SelectMimeType.ofVideo()).isPageStrategy(true, 50).buildMediaLoader();
-                }
+                loader = PictureSelector.create(mRootView.getActivity())
+                        .dataSource(SelectMimeType.ofVideo()).buildMediaLoader();
                 loader.loadAllAlbum(new OnQueryAllAlbumListener<LocalMediaFolder>() {
                     @Override
                     public void onComplete(List<LocalMediaFolder> result) {
                         Log.w("", "");
+                        for (LocalMediaFolder localMediaFolder:result){
+                            Timber.e("getVideos  -----"+localMediaFolder.getFolderName());
+                            if (localMediaFolder.getBucketId()!=-1){
+                                if (localMediaFolder.getFide().getPath().contains("/normal_storage/") ){
+                                    localMediaFolderList.add(localMediaFolder);
+                                }
+                            }
+                        }
 
+                        getVideoInfoList(false);
                         if (localMediaFolders.size()>0){
                             mPosition = result.get(0).getFolderTotalNum();
                         }
                         VideoFilePresenter.this.  localMediaFolders=result;
-                        VideoFilePresenter.this.getLocalMedias();
+                     //   VideoFilePresenter.this.getLocalMedias();
                     }
                 });
 
@@ -167,32 +180,53 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         //开线程初始化数据
     }
 
-    public void getLocalMedias() {
-    
-        if (localMediaFolders.size()<=0){
-            getVideoInfoList();
-            mRootView.hideLoading();
-            return;
-        }
-        loader.loadPageMediaData(localMediaFolders.get(mPosition).getBucketId(), page,50,new OnQueryDataResultListener<LocalMedia>(){
+    public void getLocalMedias(long bucketId,int i) {
+
+        loader.loadPageMediaDatas(bucketId,new OnQueryDataResultListener<LocalMedia>(){
             @Override
             public void onComplete(ArrayList<LocalMedia> result, boolean isHasMore) {
                 super.onComplete(result, isHasMore);
-                mRootView.hideLoading();
                 mLocalMedia.addAll(result);
-                getVideoInfoList();
+                getVideoInfoList(true);
+
             }
         });
+    }
+    public void getLocalMedias() {
+        mRootView.setRecyclerViewUI(View.VISIBLE);
+        mRootView.showLoading();
+        mLocalMedia.clear();
+        for (File file:mFiles){
+            LocalMedia localMedia=new LocalMedia();
+            localMedia.setPath(file.getParent());
+            localMedia.setFileName(file.getName());
+            localMedia.setRealPath(file.getPath());
+            mLocalMedia.add(localMedia);
+        }
+        getVideoInfoList(true);
     }
 
 
 
 
-    public void getVideoInfoList() {
-        if (mLocalMedia.size() <= 0) {
-            mRootView.nullData();
+    public void getVideoInfoList(boolean b) {
+        mRootView.hideLoading();
+        if (b){
+            if (mLocalMedia.size() <= 0) {
+                mRootView.nullData(View.VISIBLE);
+            }else {
+                mRootView.nullData(View.GONE);
+            }
+            mVideoFileAdapter.notifyDataSetChanged();
+        }else {
+            if (localMediaFolderList.size() <= 0) {
+                mRootView.nullData(View.VISIBLE);
+            }else {
+                mRootView.nullData(View.GONE);
+            }
+            mVideoFileAdapters.notifyDataSetChanged();
         }
-        mVideoFileAdapter.notifyDataSetChanged();
+
     }
 
     public void onComplete() {
@@ -294,10 +328,13 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     }
 
     public void isLogIn() {
+
         if (mUserManager.queryAll().size()>0) {
-         mRootView.setLogInUi(View.GONE);
+            mRootView.setLogInUi(View.GONE,mUserManager.queryAll().get(0).getUserName(),mUserManager.queryAll().get(0).getPassWord());
+            mRootView.setUserName(mUserManager.queryAll().get(0).getUserName());
         }else {
-            mRootView.setLogInUi(View.VISIBLE);
+            mRootView.setLogInUi(View.VISIBLE,"","");
+            mRootView.setUserName("");
         }
     }
     public void login(String toString, String toString1) {
@@ -310,11 +347,11 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                 mModel.login(toString,toString1).subscribeOn(Schedulers.io())
                         .retryWhen(new RetryWithDelay(0, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
                         .doOnSubscribe(disposable -> {
-                            // mRootView.showLoading();
+                             mRootView.showLoading();
                         })
                         .observeOn(AndroidSchedulers.mainThread())
                         .doFinally(() -> {
-                            //  mRootView.hideLoading();
+                             mRootView.hideLoading();
                         })
                         .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
                         .subscribe(new ErrorHandleSubscriber<Request<User>>(mErrorHandler) {
@@ -323,7 +360,7 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                                 isUserExists.getData().setPassWord(finalToString);
                                 isUserExists.getData().setUserName(toString);
                                 mUserManager.saveOrUpdate(isUserExists.getData());
-
+                                isLogIn();
                             }
 
                             @Override
@@ -342,4 +379,49 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         mUserManager.deleteAll();
         isLogIn();
     }
+
+    public  void getVideos(Handler myHandler,File file) {
+        requestPermission(new PermissionUtil.RequestPermission() {
+            @Override
+            public void onRequestPermissionSuccess() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        judge(file);
+                        Message message = new Message();
+                        message.what = 1;
+                        myHandler.sendMessage(message);
+                    }
+                }).start();
+            }
+
+            @Override
+            public void onRequestPermissionFailure(List<String> permissions) {
+
+            }
+
+            @Override
+            public void onRequestPermissionFailureWithAskNeverAgain(List<String> permissions) {
+
+            }
+        }, permissions, mErrorHandler, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE);
+        //开线程初始化数据
+
+    }
+
+    private void judge(File file) {
+
+        //  mVideoInfoList.addAll(MediaUtil.INSTANCE.setVideoList(mRootView.getActivity()));
+        try {
+            mPreferences = mRootView.getActivity().getSharedPreferences("table", Context.MODE_PRIVATE);
+        } catch (Exception e) {
+            //子线程未销毁可能时执行
+        }
+        mFiles.clear();
+        mFiles.addAll( com.blankj.utilcode.utils.FileUtils.listFilesInDirWithFilter(file, ".mp4"));
+
+
+    }
+
+
 }
