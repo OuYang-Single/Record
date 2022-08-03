@@ -10,12 +10,20 @@ import com.mmt.record.greendao.FolderEntityManager;
 import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.ManagerFactory;
 import com.mmt.record.greendao.UserManager;
+import com.mmt.record.mvp.model.entity.GpsEntitys;
 import com.mmt.record.mvp.model.mvp.contract.RecordContract;
 import com.mmt.record.mvp.model.mvp.contract.RegisterContract;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.model.RecordModel;
 import com.mmt.record.mvp.model.mvp.model.RegisterModel;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+
+import org.alternativevision.gpx.beans.GPX;
+import org.alternativevision.gpx.beans.Waypoint;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import dagger.Binds;
 import dagger.Module;
@@ -46,6 +54,16 @@ public abstract class RecordModule {
     @Provides
     public static FolderEntityManager getFolderEntityManager(RecordContract.View view) {
         return ManagerFactory.getInstance().getFolderEntityManager(view.getActivity());
+    }
+    @ActivityScope
+    @Provides
+    public static GPX getGpx() {
+        return new  GPX();
+    }
+
+    @Provides
+    public static HashSet<Waypoint> getHashSetWaypoint() {
+        return new   HashSet<Waypoint>();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.mmt.record.mvp.model.mvp.ui.activity;
 
+import static com.mmt.record.mvp.model.mvp.model.RecordModel.gpxFileString;
 import static com.mmt.record.mvp.model.mvp.util.RoutingUtils.MAIN_PATH;
 
 import android.app.Activity;
@@ -22,9 +23,8 @@ import androidx.annotation.Nullable;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
-import com.amap.api.maps.AMap;
+
 import com.amap.api.maps.MapView;
-import com.amap.api.maps.model.MyLocationStyle;
 import com.deep.dpwork.util.CountDownTimeTextUtil;
 import com.deep.dpwork.util.DisplayUtil;
 import com.github.florent37.viewanimator.ViewAnimator;
@@ -45,50 +45,63 @@ import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
+import org.alternativevision.gpx.GPXParser;
+import org.alternativevision.gpx.beans.GPX;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.inject.Inject;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
-@Route(path = RoutingUtils. RECORD_PATH)
+@Route(path = RoutingUtils.RECORD_PATH)
 public class RecordActivity extends BaseActivity<RecordPresenter> implements RecordContract.View, RecordManagerUtil.RecordEvent {
     @BindView(R.id.mainSurfaceView)
     SurfaceView mainSurfaceView;
 
     @BindView(R.id.map)
-    MapView mMapView ;
+    MapView mMapView;
     @BindView(R.id.recordImg)
-    ImageView recordImg ;
+    ImageView recordImg;
     @BindView(R.id.labeleds)
-    TextView labeleds ;
+    TextView labeleds;
     @BindView(R.id.timeTv)
-    TextView timeTv ;
+    TextView timeTv;
     @BindView(R.id.user_name)
     TextView user_name;
-    Timer   timer;
-    public Handler handlers=new Handler(){
+    Timer timer;
+    @Inject
+    GPX gpx;
+    public Handler handlers = new Handler() {
         @Override
         public void dispatchMessage(@NonNull Message msg) {
             super.dispatchMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case 0:
-                    if (RecordManagerUtil.getInstance().isRecording) {
-                       // timeTv.text = "录制中"
-                        timeTv.setText (CountDownTimeTextUtil.getTimerString(System.currentTimeMillis() - startTime).toString());
-                    } else {
-                        //luZhiTv.text = "录制已停止"
-                        timeTv.setText("00:00:00");
+                    if (timeTv != null) {
+                        if (RecordManagerUtil.getInstance().isRecording) {
+                            // timeTv.text = "录制中"
+                            timeTv.setText(CountDownTimeTextUtil.getTimerString(System.currentTimeMillis() - startTime).toString());
+                        } else {
+                            //luZhiTv.text = "录制已停止"
+                            timeTv.setText("00:00:00");
+                        }
                     }
                     break;
             }
         }
     };
-    private long   startTime= 0;
+    private long startTime = 0;
+
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
         DaggerRecordComponent //如找不到该类,请编译一下项目
@@ -103,7 +116,8 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     public int initView(@Nullable Bundle bundle) {
         return R.layout.activity_record;
     }
-    private BroadcastReceiver broadcastReceiver  = new  BroadcastReceiver() {
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -116,7 +130,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         initTime();
         mPresenter.isLogIn();
 
-        RecordManagerUtil.getInstance().init(this, mainSurfaceView,this);
+        RecordManagerUtil.getInstance().init(this, mainSurfaceView, this);
         labeleds.setText("停止录制");
         mMapView.onCreate(bundle);
 
@@ -126,7 +140,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     public void initTime() {
         timer = new Timer();
         handler.sendEmptyMessage(0);
-        timer.schedule(new  TimerTask() {
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 handlers.sendEmptyMessage(0);
@@ -136,17 +150,17 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
 
     @Override
     public void showMessage(@NonNull String s) {
-        ToastUtils.makeText(this,s);
+        ToastUtils.makeText(this, s);
     }
 
-    @OnClick({R.id.labeleds,R.id.backs,R.id.back})
-    public void OnClick(View view){
-        switch (view.getId()){
+    @OnClick({R.id.labeleds, R.id.backs, R.id.back})
+    public void OnClick(View view) {
+        switch (view.getId()) {
             case R.id.labeleds:
-                if (RecordManagerUtil.getInstance().isRecording){
+                if (RecordManagerUtil.getInstance().isRecording) {
                     labeleds.setText("开始录制");
                     RecordManagerUtil.getInstance().stopRecord();
-                }else {
+                } else {
                     mPresenter.Apply(0);
                 }
                 break;
@@ -159,16 +173,15 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
 
     @Override
     public void onRequestPermissionSuccess() {
-        if (!RecordManagerUtil.getInstance().isRecording){
-            startTime= System.currentTimeMillis();
+        if (!RecordManagerUtil.getInstance().isRecording) {
+            startTime = System.currentTimeMillis();
             RecordManagerUtil.getInstance().startRecord(5);
             labeleds.setText("停止录制");
         }
 
         mPresenter.Location(mMapView);
-        mPresenter.onComplete();
-        mPresenter.gpsUploads(0);
-        anInt=0;
+
+        anInt = 0;
     }
 
     @Override
@@ -184,72 +197,84 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
 
     @Override
     public void onComplete(File parentFile, String targetName) {
-        mPresenter.onComplete(parentFile,targetName);
-        mPresenter.gpsUpload(parentFile,targetName,false);
+        mPresenter.onComplete(parentFile, targetName);
+        mPresenter.gpsUpload(parentFile, targetName, false);
     }
 
     @Override
     public void onStop(File parentFile, String targetName) {
-        if (targetName==null){
-        return;
+        if (targetName == null) {
+            return;
         }
         try {
+            GPXParser p = new GPXParser();
+            String gpxFileString=parentFile+"/"+targetName.replace(".mp4",".gpx");
+            FileOutputStream out = new FileOutputStream(gpxFileString);
+            p.writeGPX(gpx, out);
+            out.close();
             Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-            FileSaveUtils.INSTANCE.saveVideo(this,new File(parentFile+"/"+targetName));
-        }catch (Exception e){
+            FileSaveUtils.INSTANCE.saveVideo(this, new File(parentFile + "/" + targetName));
+        } catch (Exception e) {
 
         }
-
-        if (anInt==0){
-            mPresenter.onComplete(parentFile,targetName);
+        if (mPresenter!=null){
+            if (anInt==0){
+                mPresenter.onComplete(parentFile,targetName);
+            }
+            mPresenter.gpsUpload(parentFile,targetName, anInt != 0);
         }
-        mPresenter.gpsUpload(parentFile,targetName, anInt != 0);
     }
     @Override
     protected void onDestroy() {
-
         super.onDestroy();
+        timer.cancel();
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
-        if (mMapView!=null){
+        if (mMapView != null) {
             mMapView.onDestroy();
         }
-        timer.cancel();
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
-        if (mMapView!=null){
+
+        if (mMapView != null) {
             mMapView.onResume();
         }
-        mPresenter.Apply(500);
+        if (mPresenter != null) {
+            mPresenter.onComplete();
+            mPresenter.gpsUploads(0);
+            mPresenter.Apply(500);
+        }
     }
-    int anInt=0;
+
+    int anInt = 0;
+
     @Override
     protected void onPause() {
         super.onPause();
         //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
-        if (mMapView!=null){
+        if (mMapView != null) {
             mMapView.onPause();
         }
-        anInt=1;
+        anInt = 1;
         RecordManagerUtil.getInstance().stopRecord();
     }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //在activity执行onSaveInstanceState时执行mMapView.onSaveInstanceState (outState)，保存地图当前的状态
-        if (mMapView!=null){
+        if (mMapView != null) {
             mMapView.onSaveInstanceState(outState);
         }
-       // RecordManagerUtil.getInstance().stopRecord();
+        // RecordManagerUtil.getInstance().stopRecord();
     }
 
 }

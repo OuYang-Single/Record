@@ -113,7 +113,20 @@ public class FileUtils {
         outZip.finish();
         outZip.close();
     }
+    public static void ZipFolders(List<File> srcFileString, String zipFileString) throws Exception {
+        //创建ZIP
+        ZipOutputStream outZip = new ZipOutputStream(new FileOutputStream(zipFileString));
+        //创建文件
+        //压缩
+        for (File file:srcFileString){
+            ZipFiles(file.getParent()+ File.separator, file.getName(), outZip);
+        }
 
+
+        //完成和关闭
+        outZip.finish();
+        outZip.close();
+    }
 
     public static void ZipFolder(List<FileEntity> fileEntities, String zipFileString) throws Exception {
         //创建ZIP
@@ -167,6 +180,7 @@ public class FileUtils {
         if (zipOutputSteam == null)
             return;
         for ( FileEntity fileEntity:fileEntities) {
+            ZipFile(fileEntity.getFolderEntity().getFolderPath()+"/",fileEntity.getFilePath().replace(".mp4",".gpx"), zipOutputSteam);
             ZipFile(fileEntity.getFolderEntity().getFolderPath()+"/",fileEntity.getFilePath(), zipOutputSteam);
         }
     }

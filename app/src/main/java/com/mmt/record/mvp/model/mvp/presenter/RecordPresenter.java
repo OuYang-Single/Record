@@ -42,6 +42,7 @@ import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.entity.FileEntity;
 import com.mmt.record.mvp.model.entity.FolderEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
+import com.mmt.record.mvp.model.entity.GpsEntitys;
 import com.mmt.record.mvp.model.entity.Request;
 import com.mmt.record.mvp.model.entity.User;
 import com.mmt.record.mvp.model.mvp.contract.MainContract;
@@ -55,7 +56,14 @@ import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.Utils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
+import org.alternativevision.gpx.GPXParser;
+import org.alternativevision.gpx.beans.GPX;
+import org.alternativevision.gpx.beans.Waypoint;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -94,6 +102,10 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
 
     @Inject
     FolderEntityManager mFolderEntityManager;
+    @Inject
+    HashSet<Waypoint> waypoints;
+    @Inject
+    GPX gpx;
 
     AMap aMap;
     MyLocationStyle myLocationStyle;
@@ -320,8 +332,11 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
     @Override
     public void onMyLocationChange(Location location) {
         this.location = location;
-        //TraceLocation(double latitude, double longitude, float speed, float bearing, long time)
-
+        Waypoint waypoint=new Waypoint();
+        waypoint.setTime(new Date(location.getTime()));
+        waypoint.setLatitude(location.getLatitude());
+        waypoint.setLongitude(location.getLongitude());
+        gpx.addWaypoint(waypoint);
     }
 
     public void gpsUpload(File parentFile, String targetName,boolean is) {

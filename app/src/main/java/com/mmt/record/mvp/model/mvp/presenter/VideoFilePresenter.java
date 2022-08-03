@@ -270,7 +270,7 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                         mFileEntityManager.update(fileEntities);
                         Timber.e("" + stringRequest.getData());
                         try {
-                            new File(RecordModel.zipFileString).delete();
+                         //   new File(RecordModel.zipFileString).delete();
                         } catch (Exception e) {
 
                         }

@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.integration.IRepositoryManager;
 import com.jess.arms.mvp.BaseModel;
+import com.mmt.record.app.AppLifecyclesImpl;
 import com.mmt.record.mvp.model.api.Api;
 import com.mmt.record.mvp.model.entity.FileEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
@@ -62,7 +63,7 @@ public class VideoFileModel extends BaseModel implements VideoFileContract.Model
                 if (!FileUtils.isFile){
                     throw new RuntimeException("Stub!");
                 }
-                RequestBody filePart = RetrofitUtils.createPartFromString(FileUtils.getDeviceId(mApplication));
+                RequestBody filePart = RetrofitUtils.createPartFromString(FileUtils.getDeviceId(AppLifecyclesImpl.application));
                 return  Observable.just(mRepositoryManager
                         .obtainRetrofitService(Api.class)
                         .upload(filePart,    RetrofitUtils.createFilePart("file",new File(zipFileString))));
