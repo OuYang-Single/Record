@@ -18,6 +18,8 @@ import com.jess.arms.utils.ArmsUtils;
 import com.mmt.record.BuildConfig;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
+import com.tencent.bugly.crashreport.CrashReport;
+
 import timber.log.Timber;
 
 /**
@@ -42,6 +44,7 @@ public class AppLifecyclesImpl implements AppLifecycles {
 
     @Override
     public void onCreate(@NonNull Application application) {
+        CrashReport.initCrashReport(application);
         AppLifecyclesImpl.application =application;
         ARouter.init(application);
 

@@ -58,6 +58,7 @@ import com.mmt.record.mvp.model.mvp.util.MediaUtil;
 import com.mmt.record.mvp.model.mvp.util.ResourcesUtils;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tencent.bugly.crashreport.CrashReport;
 
 
 import java.io.File;
@@ -150,9 +151,14 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                         for (LocalMediaFolder localMediaFolder:result){
                             Timber.e("getVideos  -----"+localMediaFolder.getFolderName());
                             if (localMediaFolder.getBucketId()!=-1){
-                                if (localMediaFolder.getFide().getPath().contains("/normal_storage/") ){
-                                    localMediaFolderList.add(localMediaFolder);
+                                try {
+                                    if (localMediaFolder.getFide().getPath().contains("/normal_storage/") ){
+                                        localMediaFolderList.add(localMediaFolder);
+                                    }
+                                }catch (Exception e){
+                                    CrashReport.postCatchedException(e);
                                 }
+
                             }
                         }
 
@@ -197,11 +203,16 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         mRootView.showLoading();
         mLocalMedia.clear();
         for (File file:mFiles){
-            LocalMedia localMedia=new LocalMedia();
-            localMedia.setPath(file.getParent());
-            localMedia.setFileName(file.getName());
-            localMedia.setRealPath(file.getPath());
-            mLocalMedia.add(localMedia);
+            try {
+                LocalMedia localMedia=new LocalMedia();
+                localMedia.setPath(file.getParent());
+                localMedia.setFileName(file.getName());
+                localMedia.setRealPath(file.getPath());
+                mLocalMedia.add(localMedia);
+            }catch (Exception e){
+                CrashReport.postCatchedException(e);
+            }
+
         }
         getVideoInfoList(true);
     }

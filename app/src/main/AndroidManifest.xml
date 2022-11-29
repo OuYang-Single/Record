@@ -100,6 +100,21 @@
         <meta-data android:name="com.amap.api.v2.apikey" android:value="ed8eb6828255142efc9480d19a7e4057">
 
         </meta-data>
+
+        <!-- 配置APP ID -->
+        <meta-data
+            android:name="BUGLY_APPID"
+            android:value="d642419505" />
+        <!-- 配置APP版本号 -->
+        <meta-data
+            android:name="BUGLY_APP_VERSION"
+            android:value="17561842-6a3c-4b8a-9f11-2531c6598b5b" />
+
+        <!-- 配置Bugly调试模式（true或者false）-->
+        <meta-data
+            android:name="BUGLY_ENABLE_DEBUG"
+            android:value="false" />
+
     </application>
 
 </manifest>
