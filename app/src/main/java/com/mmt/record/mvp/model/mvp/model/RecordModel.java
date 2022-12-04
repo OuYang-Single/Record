@@ -103,10 +103,18 @@ public class RecordModel extends BaseModel implements RecordContract.Model {
                     throw new Exception("Stub!");
                 }
                 RequestBody filePart = RetrofitUtils.createPartFromString(FileUtils.getDeviceId(AppLifecyclesImpl.application));
-                return  Observable.just(mRepositoryManager
-                        .obtainRetrofitService(Api.class)
-                        .upload(filePart,    RetrofitUtils.createFilePart("file",new File(zipFileString))));
+                try {
+                    return  Observable.just(mRepositoryManager
+                            .obtainRetrofitService(Api.class)
+                            .upload(filePart,    RetrofitUtils.createFilePart("file",new File(zipFileString))));
+                }catch (Exception e)
+                {
+                    return  Observable.just(Observable.just(new Request()) );
+
+                }
+
             }
+
         });
     }
 

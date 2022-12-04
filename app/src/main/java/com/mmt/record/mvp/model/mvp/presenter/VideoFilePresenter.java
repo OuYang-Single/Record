@@ -152,7 +152,7 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                             Timber.e("getVideos  -----"+localMediaFolder.getFolderName());
                             if (localMediaFolder.getBucketId()!=-1){
                                 try {
-                                    if (localMediaFolder.getFide().getPath().contains("/normal_storage/") ){
+                                    if (localMediaFolder.getFirstImagePath().contains("/normal_storage/") ){
                                         localMediaFolderList.add(localMediaFolder);
                                     }
                                 }catch (Exception e){

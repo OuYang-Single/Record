@@ -62,9 +62,14 @@ import org.alternativevision.gpx.beans.Waypoint;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -336,8 +341,35 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
         waypoint.setTime(new Date(location.getTime()));
         waypoint.setLatitude(location.getLatitude());
         waypoint.setLongitude(location.getLongitude());
+       // dateTranfer("2022-12-04T10:26:54Z");
         gpx.addWaypoint(waypoint);
     }
+    // str的格式为---"2022-08-24T02:54:46.970Z" 这个只是其中一种格式，也有可能是"2022-08-24T02:54:46.97Z" 少了一个数字的
+// str的格式为---"2022-08-24T02:54:46.970Z" 这个只是其中一种格式，也有可能是"2022-08-24T02:54:46.97Z" 少了一个数字的
+    private String dateTranfer(String str) {
+        Date date = null;
+        // ISO 8601 slightly modified */"yyyy-MM-dd'T'HH:mm:ss'Z'",
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        // 2019-05-21T08:44:00Z 对应的时间格式 yyyy-MM-dd'T'HH:mm:ss'Z'
+        try {
+            // ISO 8601 slightly modified */"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            // 2020-09-18T06:44:32.552Z 对应的时间格式 yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+            date = sdf.parse(str);
+
+            Timber.i("UTC时间:" + date);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR, calendar.get(Calendar.HOUR) + 8);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date1 = calendar.getTime();
+            String date2 = simpleDateFormat.format(calendar.getTime());
+            Timber.i("北京时间:" + date2);
+            return date2;
+        } catch (ParseException e) {
+            return e.getLocalizedMessage();
+        }
+    }
+
 
     public void gpsUpload(File parentFile, String targetName,boolean is) {
         if (location != null) {

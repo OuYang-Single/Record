@@ -137,7 +137,13 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
             @Override
             public void onItemClick(@NonNull View view, int i, @NonNull Object o, int i1) {
                 // mPresenter.getLocalMedias( localMediaFolderList.get(i1).getBucketId(),i1);
-                mPresenter.getVideos(handlers, new File( localMediaFolderList.get(i1).getFide().getParent()));
+                try {
+                    String pus=localMediaFolderList.get(i1).getFirstImagePath().split(localMediaFolderList.get(i1).getFolderName())[0]+localMediaFolderList.get(i1).getFolderName();
+                    mPresenter.getVideos(handlers, new File(pus));
+                }catch (Exception e){
+
+                }
+
             }
         });
         mRecyclerView.setAdapter(mVideoFileAdapter);

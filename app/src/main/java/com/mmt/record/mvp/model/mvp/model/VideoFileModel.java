@@ -66,7 +66,7 @@ public class VideoFileModel extends BaseModel implements VideoFileContract.Model
                 RequestBody filePart = RetrofitUtils.createPartFromString(FileUtils.getDeviceId(AppLifecyclesImpl.application));
                 return  Observable.just(mRepositoryManager
                         .obtainRetrofitService(Api.class)
-                        .upload(filePart,    RetrofitUtils.createFilePart("file",new File(zipFileString))));
+                        .upload(filePart, RetrofitUtils.createFilePart("file",new File(zipFileString))));
             }
         });
     }
