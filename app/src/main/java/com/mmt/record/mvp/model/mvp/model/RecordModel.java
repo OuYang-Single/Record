@@ -45,8 +45,8 @@ public class RecordModel extends BaseModel implements RecordContract.Model {
     GPX gpx;
     @Inject
     Application mApplication;
-    public static final  String zipFileString= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+"/normal_storage/complete.zip";
-    public static final  String gpxFileString= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+"/normal_storage/outFile.gpx";
+    public static final  String zipFileString= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+"/complete.zip";
+    public static final  String gpxFileString= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+"/outFile.gpx";
 
     @Inject
     public RecordModel(IRepositoryManager repositoryManager) {

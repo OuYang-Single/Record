@@ -12,6 +12,8 @@ public class ManagerFactory {
     FileEntityManager mFileEntityManager;
     FolderEntityManager mFolderEntityManager;
     GpsEntityManager mGpsEntityManager;
+    FolderBeanManager mFolderBeanManager;
+    FileBeanManager mFileBeanManager;
 
 
     private static ManagerFactory mInstance = null;
@@ -56,6 +58,19 @@ public class ManagerFactory {
             mGpsEntityManager = new GpsEntityManager(DaoManager.getInstance(context).getDaoSession().getGpsEntityDao());
         }
         return mGpsEntityManager;
+    }
+    public synchronized FolderBeanManager getFolderBeanManager(Context context) {
+        if (mFolderBeanManager == null){
+            mFolderBeanManager = new FolderBeanManager(DaoManager.getInstance(context).getDaoSession().getFolderBeanDao());
+        }
+        return mFolderBeanManager;
+    }
+
+    public synchronized FileBeanManager getFileBeanManager(Context context) {
+        if (mFileBeanManager == null){
+            mFileBeanManager = new FileBeanManager(DaoManager.getInstance(context).getDaoSession().getFileBeanDao());
+        }
+        return mFileBeanManager;
     }
 }
 

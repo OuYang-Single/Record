@@ -8,12 +8,16 @@ import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import org.greenrobot.greendao.internal.DaoConfig;
 
+import com.mmt.record.mvp.model.entity.FileBean;
 import com.mmt.record.mvp.model.entity.FileEntity;
+import com.mmt.record.mvp.model.entity.FolderBean;
 import com.mmt.record.mvp.model.entity.FolderEntity;
 import com.mmt.record.mvp.model.entity.GpsEntity;
 import com.mmt.record.mvp.model.entity.User;
 
+import com.mmt.record.greendao.FileBeanDao;
 import com.mmt.record.greendao.FileEntityDao;
+import com.mmt.record.greendao.FolderBeanDao;
 import com.mmt.record.greendao.FolderEntityDao;
 import com.mmt.record.greendao.GpsEntityDao;
 import com.mmt.record.greendao.UserDao;
@@ -27,12 +31,16 @@ import com.mmt.record.greendao.UserDao;
  */
 public class DaoSession extends AbstractDaoSession {
 
+    private final DaoConfig fileBeanDaoConfig;
     private final DaoConfig fileEntityDaoConfig;
+    private final DaoConfig folderBeanDaoConfig;
     private final DaoConfig folderEntityDaoConfig;
     private final DaoConfig gpsEntityDaoConfig;
     private final DaoConfig userDaoConfig;
 
+    private final FileBeanDao fileBeanDao;
     private final FileEntityDao fileEntityDao;
+    private final FolderBeanDao folderBeanDao;
     private final FolderEntityDao folderEntityDao;
     private final GpsEntityDao gpsEntityDao;
     private final UserDao userDao;
@@ -41,8 +49,14 @@ public class DaoSession extends AbstractDaoSession {
             daoConfigMap) {
         super(db);
 
+        fileBeanDaoConfig = daoConfigMap.get(FileBeanDao.class).clone();
+        fileBeanDaoConfig.initIdentityScope(type);
+
         fileEntityDaoConfig = daoConfigMap.get(FileEntityDao.class).clone();
         fileEntityDaoConfig.initIdentityScope(type);
+
+        folderBeanDaoConfig = daoConfigMap.get(FolderBeanDao.class).clone();
+        folderBeanDaoConfig.initIdentityScope(type);
 
         folderEntityDaoConfig = daoConfigMap.get(FolderEntityDao.class).clone();
         folderEntityDaoConfig.initIdentityScope(type);
@@ -53,26 +67,40 @@ public class DaoSession extends AbstractDaoSession {
         userDaoConfig = daoConfigMap.get(UserDao.class).clone();
         userDaoConfig.initIdentityScope(type);
 
+        fileBeanDao = new FileBeanDao(fileBeanDaoConfig, this);
         fileEntityDao = new FileEntityDao(fileEntityDaoConfig, this);
+        folderBeanDao = new FolderBeanDao(folderBeanDaoConfig, this);
         folderEntityDao = new FolderEntityDao(folderEntityDaoConfig, this);
         gpsEntityDao = new GpsEntityDao(gpsEntityDaoConfig, this);
         userDao = new UserDao(userDaoConfig, this);
 
+        registerDao(FileBean.class, fileBeanDao);
         registerDao(FileEntity.class, fileEntityDao);
+        registerDao(FolderBean.class, folderBeanDao);
         registerDao(FolderEntity.class, folderEntityDao);
         registerDao(GpsEntity.class, gpsEntityDao);
         registerDao(User.class, userDao);
     }
     
     public void clear() {
+        fileBeanDaoConfig.clearIdentityScope();
         fileEntityDaoConfig.clearIdentityScope();
+        folderBeanDaoConfig.clearIdentityScope();
         folderEntityDaoConfig.clearIdentityScope();
         gpsEntityDaoConfig.clearIdentityScope();
         userDaoConfig.clearIdentityScope();
     }
 
+    public FileBeanDao getFileBeanDao() {
+        return fileBeanDao;
+    }
+
     public FileEntityDao getFileEntityDao() {
         return fileEntityDao;
+    }
+
+    public FolderBeanDao getFolderBeanDao() {
+        return folderBeanDao;
     }
 
     public FolderEntityDao getFolderEntityDao() {

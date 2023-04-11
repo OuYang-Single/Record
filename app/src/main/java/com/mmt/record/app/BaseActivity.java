@@ -12,11 +12,14 @@ import androidx.annotation.Nullable;
 
 import com.jess.arms.mvp.IPresenter;
 import com.mmt.record.R;
+import com.mmt.record.mvp.model.entity.EventMessage;
 import com.mmt.record.mvp.model.mvp.presenter.VideoFilePresenter;
 import com.mmt.record.mvp.model.mvp.ui.Receiver.NetStateChangeObserver;
 import com.mmt.record.mvp.model.mvp.ui.Receiver.NetStateChangeReceiver;
 import com.mmt.record.mvp.model.mvp.util.DateUtil;
 import com.mmt.record.mvp.model.mvp.util.NetworkType;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Date;
 import java.util.Timer;
@@ -104,6 +107,8 @@ public abstract class BaseActivity<P extends IPresenter> extends com.jess.arms.b
     @Override
     public void onNetConnected(NetworkType networkType) {
         tv_no_network.setVisibility(View.GONE);
+        EventBus.getDefault().postSticky(new EventMessage("onComplete"));
+        EventBus.getDefault().postSticky(new EventMessage("gpsUploads"));
         if (networkType.equals(NetworkType.NETWORK_WIFI) ) {
             img_network_type.setImageResource(R.mipmap.ic_wifi);
         } else {

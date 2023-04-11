@@ -8,10 +8,17 @@ import android.view.SurfaceView;
 
 import com.deep.dpwork.util.CountDownTimeTextUtil;
 import com.mmt.record.greendao.FileEntityDao;
+import com.mmt.record.greendao.FolderBeanDao;
+import com.mmt.record.greendao.FolderBeanManager;
 import com.mmt.record.greendao.FolderEntityDao;
 import com.mmt.record.greendao.ManagerFactory;
+import com.mmt.record.mvp.model.entity.FileBean;
 import com.mmt.record.mvp.model.entity.FileEntity;
+import com.mmt.record.mvp.model.entity.FolderBean;
 import com.mmt.record.mvp.model.entity.FolderEntity;
+import com.tencent.bugly.crashreport.CrashReport;
+
+import org.greenrobot.greendao.annotation.NotNull;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -51,7 +58,7 @@ public class RecordManagerUtil {
     public void init(Activity activity, SurfaceView surfaceView,RecordEvent mRecordEvent) {
         this.activity=activity;
         this.mRecordEvent=mRecordEvent;
-        mediaUtils = new MediaUtils(activity);
+        mediaUtils = new MediaUtils(activity,mRecordEvent);
 
         mediaUtils.setRecorderType(MediaUtils.MEDIA_VIDEO);
 
@@ -70,17 +77,27 @@ public class RecordManagerUtil {
         return format.format(d1);
     }
 
-    private void initDate() {
+    public void deleteFiles(){
         long i= (long) (MediaUtil.INSTANCE. getSDAllSize()*0.05)/1024;
         long remaining= MediaUtil.INSTANCE. getSDFreeSize()/1024;
+        CrashReport.postCatchedException(new Throwable("日志内容: 剩余 "+remaining));
+        CrashReport.postCatchedException(new Throwable("日志内容: 总 "+MediaUtil.INSTANCE. getSDAllSize()));
         if (remaining-i<=400){
+            CrashReport.postCatchedException(new Throwable("日志内容:  删除"));
             deleteFile();
         }
+    }
+
+    private void initDate() {
+
         // 文件路径
         File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
         String dateTime = getTimeString(System.currentTimeMillis());
-        parentFile = new File(pathFile.getPath() + "/normal_storage/" + dateTime);
+        parentFile = new File(pathFile.getPath() + "/" + dateTime);
         if (parentFile.mkdirs()) {
+            if (ManagerFactory.getInstance().getFolderBeanManager(activity).queryBuilder().where(FolderBeanDao.Properties.FirstImagePath.eq(parentFile.getPath())).build().list().size()<=0){
+                ManagerFactory.getInstance().getFolderBeanManager(activity).save(new FolderBean(dateTime,parentFile.getPath()));
+            }
             Timber.i("创建目录:" + parentFile.getPath());
         } else {
             Timber.i("创建目录:" + parentFile.getPath() + " 失败");
@@ -91,6 +108,15 @@ public class RecordManagerUtil {
         FolderEntity folderEntity=     ManagerFactory.getInstance().getFolderEntityManager(activity).queryBuilder().where(FolderEntityDao.Properties.FolderPath.eq(parentFile.getPath())).build().unique();
         targetName= "Dashcam001-" + nowTime().replace(':', '.').replace(' ', '_') + "-" + System.currentTimeMillis() + ".mp4";
         Timber.i("创建文件:" + targetName);
+        try {
+            FolderBean folderBean=   ManagerFactory.getInstance().getFolderBeanManager(activity).queryBuilder().where(FolderBeanDao.Properties.FirstImagePath.eq(parentFile.getPath())).build().unique();
+            if (folderBean!=null){
+                ManagerFactory.getInstance().getFileBeanManager(activity).save(new  FileBean(  parentFile.getPath(), targetName,  folderBean.getId(),  folderBean.getId()));
+            }
+        }catch (Exception e){
+
+        }
+
         ManagerFactory.getInstance().getFileEntityManager(activity).save(new FileEntity(targetName,System.currentTimeMillis(),  folderEntity.getId(),folderEntity.getId()));
 
        /* String dateOldTime = getTimeString(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 7);
@@ -263,5 +289,6 @@ public void deleteFile(){
     public   interface  RecordEvent{
         void onComplete(File parentFile,String targetName);
         void onStop(File parentFile,String targetName);
+        void onStarts();
     }
 }

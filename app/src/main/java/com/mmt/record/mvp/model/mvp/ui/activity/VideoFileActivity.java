@@ -1,9 +1,18 @@
 package com.mmt.record.mvp.model.mvp.ui.activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -31,16 +40,21 @@ import com.mmt.record.app.BaseActivity;
 
 import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.di.component.DaggerVideoFileComponent;
+import com.mmt.record.mvp.model.entity.EventMessage;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.LocalMediaFolder;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
 import com.mmt.record.mvp.model.mvp.presenter.VideoFilePresenter;
+import com.mmt.record.mvp.model.mvp.ui.Service.MyService;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapter;
 import com.mmt.record.mvp.model.mvp.ui.adapter.VideoFileAdapters;
 import com.mmt.record.mvp.model.mvp.util.DateUtil;
 import com.mmt.record.mvp.model.mvp.util.NetworkType;
+import com.mmt.record.mvp.model.mvp.util.RecordManagerUtil;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.Date;
@@ -53,7 +67,7 @@ import butterknife.OnClick;
 import me.leefeng.promptlibrary.PromptDialog;
 
 @Route(path = RoutingUtils.VIDEO_FILE_PATH)
-public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implements VideoFileContract.View{
+public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implements VideoFileContract.View, RecordManagerUtil.RecordEvent {
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.recyclerViews)
@@ -78,6 +92,9 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
     ImageView image_break;
     @BindView(R.id.user_name)
     TextView user_name;
+    @BindView(R.id.mainSurfaceView)
+    SurfaceView mainSurfaceView;
+
     @Inject
     GridLayoutManager manager;
 
@@ -91,6 +108,7 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
     List<LocalMediaFolder> localMediaFolderList;
     @Inject
     List<LocalMedia> mLocalMedia;
+    boolean aBoolean= false;
     Handler handlers=new Handler(){
         @Override
         public void dispatchMessage(@NonNull Message msg) {
@@ -120,10 +138,11 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
 
     @Override
     public void initData(@Nullable Bundle bundle) {
-
-
+        Intent intent = new Intent(this, MyService.class);
+        startService(intent);
         mPresenter.isLogIn();
         initTime();
+        mainSurfaceView.setVisibility(View.GONE);
         MapsInitializer.updatePrivacyShow(this,true,true);
         AMapLocationClient.updatePrivacyShow(this,true,true);
         MapsInitializer.updatePrivacyAgree(this,true);
@@ -136,13 +155,20 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         mVideoFileAdapters.setOnItemClickListener(new DefaultAdapter.OnRecyclerViewItemClickListener() {
             @Override
             public void onItemClick(@NonNull View view, int i, @NonNull Object o, int i1) {
-                // mPresenter.getLocalMedias( localMediaFolderList.get(i1).getBucketId(),i1);
+                mPresenter.getVideos(i1);
+                /*// mPresenter.getLocalMedias( localMediaFolderList.get(i1).getBucketId(),i1);
                 try {
-                    String pus=localMediaFolderList.get(i1).getFirstImagePath().split(localMediaFolderList.get(i1).getFolderName())[0]+localMediaFolderList.get(i1).getFolderName();
-                    mPresenter.getVideos(handlers, new File(pus));
+                   File file= new File( localMediaFolderList.get(i1).getFide().getParent());
+                    mPresenter.getVideos(handlers, file);
                 }catch (Exception e){
+                    try {
+                        String pus=localMediaFolderList.get(i1).getFirstImagePath().split(localMediaFolderList.get(i1).getFolderName())[0]+localMediaFolderList.get(i1).getFolderName();
+                        mPresenter.getVideos(handlers, new File(pus));
+                    }catch (Exception exception){
 
-                }
+                    }
+
+                }*/
 
             }
         });
@@ -173,11 +199,11 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
     @Override
     protected void onStart() {
         super.onStart();
-        mPresenter.onComplete();
-        mPresenter.gpsUploads(0);
+        EventBus.getDefault().postSticky(new EventMessage("onComplete"));
+        EventBus.getDefault().postSticky(new EventMessage("gpsUploads"));
         localMediaFolderList.clear();
         showLoading();
-        mPresenter.getVideos();
+        mPresenter. getVideos();
     }
 
     @Override
@@ -242,10 +268,12 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
     public void OnClick(View view){
         switch (view.getId()){
             case R.id.labeleds:
+                showLoading();
                 mLocalMedia.clear();
                 mVideoFileAdapter.notifyDataSetChanged();
                 setRecyclerViewUI(View.GONE);
-                ARouter.getInstance().build(RoutingUtils. RECORD_PATH).navigation();
+                ARouter.getInstance().build(RoutingUtils. RECORD_PATH).withBoolean("aBoolean",aBoolean).navigation();
+                aBoolean=true;
                 break;
             case R.id.image_break:
                 nullData(View.GONE);
@@ -277,4 +305,27 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         network.setText("当前网络状态："+networkType.name());
 
     }
+
+    @Override
+    public void onComplete(File parentFile, String targetName) {
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
+    @Override
+    public void onStop(File parentFile, String targetName) {
+
+    }
+
+    @Override
+    public void onStarts() {
+
+    }
+
+
 }

@@ -7,9 +7,13 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +47,7 @@ import com.mmt.record.mvp.model.mvp.util.FileSaveUtils;
 import com.mmt.record.mvp.model.mvp.util.RecordManagerUtil;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
+import com.mmt.record.mvp.model.wigth.Camera2View;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import org.alternativevision.gpx.GPXParser;
@@ -70,6 +75,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
 
     @BindView(R.id.map)
     MapView mMapView;
+
     @BindView(R.id.recordImg)
     ImageView recordImg;
     @BindView(R.id.labeleds)
@@ -102,6 +108,8 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     };
     private long startTime = 0;
 
+    boolean isBack=false;
+
     @Override
     public void setupActivityComponent(@NonNull AppComponent appComponent) {
         DaggerRecordComponent //如找不到该类,请编译一下项目
@@ -126,15 +134,26 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     };
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     public void initData(@Nullable Bundle bundle) {
+        Log.w("RecordActivity","initData");
+        RecordManagerUtil.getInstance().init(this, mainSurfaceView, this);
         initTime();
         mPresenter.isLogIn();
-
-        RecordManagerUtil.getInstance().init(this, mainSurfaceView, this);
         labeleds.setText("停止录制");
         mMapView.onCreate(bundle);
-
+       // Camera2View.show(this);
         ViewAnimator.animate(recordImg).alpha(0f, 1f, 0f).repeatCount(-1).duration(1000).start();
+
+       /* if (!getIntent().getBooleanExtra("aBoolean",true)){
+            ARouter.getInstance().build(RoutingUtils. RECORD_PATH).withBoolean("aBoolean",true).navigation();
+            finish();
+        }*/
+
     }
 
     public void initTime() {
@@ -166,10 +185,12 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
                 break;
             case R.id.backs:
             case R.id.back:
-                finish();
+                isBack=true;
+                RecordManagerUtil.getInstance().stopRecord();
                 break;
         }
     }
+
 
     @Override
     public void onRequestPermissionSuccess() {
@@ -203,31 +224,23 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
 
     @Override
     public void onStop(File parentFile, String targetName) {
-        if (targetName == null) {
-            return;
-        }
-        try {
-            GPXParser p = new GPXParser();
-            String gpxFileString=parentFile+"/"+targetName.replace(".mp4",".gpx");
-            FileOutputStream out = new FileOutputStream(gpxFileString);
-            p.writeGPX(gpx, out);
-            out.close();
-            Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-            FileSaveUtils.INSTANCE.saveVideo(this, new File(parentFile + "/" + targetName));
-        } catch (Exception e) {
+      if (isBack){
+          finish();
+      }
+    }
 
-        }
-        if (mPresenter!=null){
-            if (anInt==0){
-                mPresenter.onComplete(parentFile,targetName);
-            }
-            mPresenter.gpsUpload(parentFile,targetName, anInt != 0);
+    @Override
+    public void onStarts() {
+        if (mPresenter != null) {
+            mPresenter.Apply(100);
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         timer.cancel();
+        RecordManagerUtil.getInstance().stopRecord();
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
         if (mMapView != null) {
             mMapView.onDestroy();
@@ -247,11 +260,7 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         if (mMapView != null) {
             mMapView.onResume();
         }
-        if (mPresenter != null) {
-            mPresenter.onComplete();
-            mPresenter.gpsUploads(0);
-            mPresenter.Apply(500);
-        }
+
     }
 
     int anInt = 0;
@@ -276,5 +285,6 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         }
         // RecordManagerUtil.getInstance().stopRecord();
     }
+
 
 }

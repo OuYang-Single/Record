@@ -8,10 +8,14 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.jess.arms.di.scope.ActivityScope;
 
 import com.jess.arms.http.imageloader.ImageLoader;
+import com.mmt.record.greendao.FileBeanManager;
 import com.mmt.record.greendao.FileEntityManager;
+import com.mmt.record.greendao.FolderBeanManager;
 import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.ManagerFactory;
 import com.mmt.record.greendao.UserManager;
+import com.mmt.record.mvp.model.entity.FileBean;
+import com.mmt.record.mvp.model.entity.FolderBean;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.LocalMediaFolder;
 import com.mmt.record.mvp.model.entity.VideoEntity;
@@ -50,12 +54,12 @@ public abstract class VideoFileModule {
 
     @ActivityScope
     @Provides
-    static VideoFileAdapter getVideoFileAdapter(List<LocalMedia> list,ImageLoader mImageLoader) {
+    static VideoFileAdapter getVideoFileAdapter(List<FileBean> list,ImageLoader mImageLoader) {
         return new VideoFileAdapter(list,mImageLoader);
     }
     @ActivityScope
     @Provides
-    static VideoFileAdapters getVideoFileAdapters(List<LocalMediaFolder> list, ImageLoader mImageLoader) {
+    static VideoFileAdapters getVideoFileAdapters(List<FolderBean> list, ImageLoader mImageLoader) {
         return new VideoFileAdapters(list,mImageLoader);
     }
     @ActivityScope
@@ -64,7 +68,17 @@ public abstract class VideoFileModule {
 
         return new ArrayList<LocalMediaFolder>();
     }
+    @ActivityScope
+    @Provides
+    static List<FileBean> getFileBean() {
+        return new ArrayList<FileBean>();
+    }
 
+    @ActivityScope
+    @Provides
+    static List<FolderBean> getFolderBean() {
+        return new ArrayList<FolderBean>();
+    }
     @ActivityScope
     @Provides
     static List<LocalMedia> getVideoEntityList() {
@@ -94,6 +108,16 @@ public abstract class VideoFileModule {
     @Provides
     public static GpsEntityManager getGpsEntityManager(VideoFileContract.View view) {
         return ManagerFactory.getInstance().getGpsEntityManager(view.getActivity());
+    }
+
+    @Provides
+    public static FolderBeanManager  getFolderBeanManager(VideoFileContract.View view) {
+        return ManagerFactory.getInstance().getFolderBeanManager(view.getActivity());
+    }
+
+    @Provides
+    public static FileBeanManager getFileBeanManager(VideoFileContract.View view) {
+        return ManagerFactory.getInstance().getFileBeanManager(view.getActivity());
     }
     @ActivityScope
     @Provides

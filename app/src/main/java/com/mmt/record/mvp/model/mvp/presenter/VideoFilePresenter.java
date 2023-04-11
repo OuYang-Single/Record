@@ -30,12 +30,18 @@ import com.jess.arms.utils.RxLifecycleUtils;
 
 
 import com.mmt.record.R;
+import com.mmt.record.greendao.FileBeanDao;
+import com.mmt.record.greendao.FileBeanManager;
 import com.mmt.record.greendao.FileEntityDao;
 import com.mmt.record.greendao.FileEntityManager;
+import com.mmt.record.greendao.FolderBeanDao;
+import com.mmt.record.greendao.FolderBeanManager;
 import com.mmt.record.greendao.GpsEntityDao;
 import com.mmt.record.greendao.GpsEntityManager;
 import com.mmt.record.greendao.UserManager;
+import com.mmt.record.mvp.model.entity.FileBean;
 import com.mmt.record.mvp.model.entity.FileEntity;
+import com.mmt.record.mvp.model.entity.FolderBean;
 import com.mmt.record.mvp.model.entity.GpsEntity;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.LocalMediaFolder;
@@ -64,11 +70,14 @@ import com.tencent.bugly.crashreport.CrashReport;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -106,9 +115,17 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     IBridgeMediaLoader loader;
     @Inject
     UserManager mUserManager;
+    @Inject
+    FileBeanManager mFileBeanManager;
+    @Inject
+    FolderBeanManager mFolderBeanManager;
     int mPosition = 1;
     @Inject
     List<LocalMediaFolder> localMediaFolderList;
+    @Inject
+    List<FolderBean> folderBeanList;
+    @Inject
+    List<FileBean> fileBeanList;
     LocalMediaFolder localMediaFolder;
     List<LocalMediaFolder> localMediaFolders=new ArrayList<>();
     @Inject
@@ -142,7 +159,27 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         requestPermission(new PermissionUtil.RequestPermission() {
             @Override
             public void onRequestPermissionSuccess() {
-                loader = PictureSelector.create(mRootView.getActivity())
+                Observable.just("")
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
+                        .flatMap(new Function<String, ObservableSource<List<FolderBean>>>() {
+                            @Override
+                            public ObservableSource<List<FolderBean>> apply(String s) throws Exception {
+
+                                return Observable.just(mFolderBeanManager.queryAll());
+                            }
+                        })
+                        .subscribe(new ErrorHandleSubscriber<List<FolderBean>>(mErrorHandler) {
+                            @Override
+                            public void onNext(List<FolderBean> observable) {
+                                folderBeanList.clear();
+                                folderBeanList.addAll(observable);
+                                getVideoInfoList(false);
+
+                            }
+                        });
+               /* loader = PictureSelector.create(mRootView.getActivity())
                         .dataSource(SelectMimeType.ofVideo()).buildMediaLoader();
                 loader.loadAllAlbum(new OnQueryAllAlbumListener<LocalMediaFolder>() {
                     @Override
@@ -152,11 +189,17 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                             Timber.e("getVideos  -----"+localMediaFolder.getFolderName());
                             if (localMediaFolder.getBucketId()!=-1){
                                 try {
-                                    if (localMediaFolder.getFirstImagePath().contains("/normal_storage/") ){
+                                    if (localMediaFolder.getFide().getPath().contains("Dashcam001") ){
                                         localMediaFolderList.add(localMediaFolder);
                                     }
                                 }catch (Exception e){
-                                    CrashReport.postCatchedException(e);
+                                    try {
+                                        if (localMediaFolder.getFirstImagePath().contains("Dashcam001") ){
+                                            localMediaFolderList.add(localMediaFolder);
+                                        }
+                                    }catch (Exception exception){
+                                        CrashReport.postCatchedException(e);
+                                    }
                                 }
 
                             }
@@ -169,7 +212,7 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                         VideoFilePresenter.this.  localMediaFolders=result;
                      //   VideoFilePresenter.this.getLocalMedias();
                     }
-                });
+                });*/
 
             }
 
@@ -199,8 +242,7 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         });
     }
     public void getLocalMedias() {
-        mRootView.setRecyclerViewUI(View.VISIBLE);
-        mRootView.showLoading();
+
         mLocalMedia.clear();
         for (File file:mFiles){
             try {
@@ -223,14 +265,14 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
     public void getVideoInfoList(boolean b) {
         mRootView.hideLoading();
         if (b){
-            if (mLocalMedia.size() <= 0) {
+            if (fileBeanList.size() <= 0) {
                 mRootView.nullData(View.VISIBLE);
             }else {
                 mRootView.nullData(View.GONE);
             }
             mVideoFileAdapter.notifyDataSetChanged();
         }else {
-            if (localMediaFolderList.size() <= 0) {
+            if (folderBeanList.size() <= 0) {
                 mRootView.nullData(View.VISIBLE);
             }else {
                 mRootView.nullData(View.GONE);
@@ -317,14 +359,20 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
                     .subscribe(new ErrorHandleSubscriber<Request>(mErrorHandler) {
                         @Override
                         public void onNext(Request isUserExists) {
-                            list.get(i).setUpload(true);
-                            mGpsEntityManager.update(list.get(i));
-                            int d = i + 1;
-                            gpsUploads(d);
+                           if ( "0".equals(isUserExists.getCode())){
+                               list.get(i).setUpload(true);
+                               mGpsEntityManager.update(list.get(i));
+                               int d = i + 1;
+                               gpsUploads(d);
+                           }else {
+                               mRootView.showMessage(isUserExists.getMsg());
+                           }
+
                         }
 
                         @Override
                         public void onError(Throwable t) {
+                            mRootView.showMessage("请求失败");
                             Log.w("", "");
                         }
                     });
@@ -391,32 +439,29 @@ public class VideoFilePresenter extends BasePresenter<VideoFileContract.Model, V
         isLogIn();
     }
 
-    public  void getVideos(Handler myHandler,File file) {
-        requestPermission(new PermissionUtil.RequestPermission() {
-            @Override
-            public void onRequestPermissionSuccess() {
-                new Thread(new Runnable() {
+    public  void getVideos(int i1) {
+
+        mRootView.setRecyclerViewUI(View.VISIBLE);
+        mRootView.showLoading();
+        Observable.just("")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
+                .flatMap(new Function<String, ObservableSource<List<FileBean>>>() {
                     @Override
-                    public void run() {
-                        judge(file);
-                        Message message = new Message();
-                        message.what = 1;
-                        myHandler.sendMessage(message);
+                    public ObservableSource<List<FileBean>> apply(String s) throws Exception {
+
+                        return Observable.just( mFileBeanManager.queryBuilder().where(FileBeanDao.Properties.FolderId.eq(folderBeanList.get(i1).getId())).list());
                     }
-                }).start();
-            }
-
-            @Override
-            public void onRequestPermissionFailure(List<String> permissions) {
-
-            }
-
-            @Override
-            public void onRequestPermissionFailureWithAskNeverAgain(List<String> permissions) {
-
-            }
-        }, permissions, mErrorHandler, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE);
-        //开线程初始化数据
+                })
+                .subscribe(new ErrorHandleSubscriber<List<FileBean>>(mErrorHandler) {
+                    @Override
+                    public void onNext(List<FileBean> observable) {
+                        fileBeanList.clear();
+                        fileBeanList.addAll(observable);
+                        getVideoInfoList(true);
+                    }
+                });
 
     }
 

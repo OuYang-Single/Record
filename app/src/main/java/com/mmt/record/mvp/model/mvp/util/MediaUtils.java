@@ -73,9 +73,10 @@ public class MediaUtils implements SurfaceHolder.Callback {
     private boolean isZoomIn = false;
     private int or = 0;
     private int cameraPosition = 1;//0代表前置摄像头，1代表后置摄像头
-    private Integer specificCameraId = null;
-    public MediaUtils(Activity activity) {
+    RecordManagerUtil.RecordEvent mRecordEvent;
+    public MediaUtils(Activity activity, RecordManagerUtil.RecordEvent mRecordEvent) {
         this.activity = activity;
+        this.mRecordEvent = mRecordEvent;
     }
 
     public void setRecorderType(int type) {
@@ -244,21 +245,10 @@ public class MediaUtils implements SurfaceHolder.Callback {
             }
         }
     }
-    private int mCameraId;
+
     private void startPreView(SurfaceHolder holder) {
         if (mCamera == null) {
-            mCameraId = Camera.getNumberOfCameras() - 1;
-            //若指定了相机ID且该相机存在，则打开指定的相机
-            if (specificCameraId != null && specificCameraId <= mCameraId) {
-                mCameraId = specificCameraId;
-            }
-
-            //没有相机
-            if (mCameraId == -1) {
-
-                return;
-            }
-            mCamera = Camera.open(mCameraId);
+            mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
         }
         if (mCamera != null) {
             mCamera.setDisplayOrientation(or);
@@ -273,7 +263,7 @@ public class MediaUtils implements SurfaceHolder.Callback {
                 previewWidth = optimalSize.width;
                 previewHeight = optimalSize.height;
                 parameters.setPreviewSize(optimalSize.width, optimalSize.height);
-                profile =  CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+                profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
                 // 这里是重点，分辨率和比特率
                 // 分辨率越大视频大小越大，比特率越大视频越清晰
                 // 清晰度由比特率决定，视频尺寸和像素量由分辨率决定
@@ -281,16 +271,9 @@ public class MediaUtils implements SurfaceHolder.Callback {
                 profile.videoFrameWidth = optimalSize.width;
                 profile.videoFrameHeight = optimalSize.height;
                 // 这样设置 1080p的视频 大小在5M , 可根据自己需求调节
-                profile.videoBitRate = (int) (2 * previewWidth * previewHeight);
+           //     profile.videoBitRate = (int) (2 * previewWidth * previewHeight);
                 profile.videoCodec = MediaRecorder.VideoEncoder.H264;
                 profile.videoBitRate = 2 * optimalSize.width * optimalSize.height;
-          /*      List<String> focusModes = parameters.getSupportedFocusModes();
-                if (focusModes != null) {
-                    for (String mode : focusModes) {
-                        mode.contains("continuous-video");
-                        parameters.setFocusMode("continuous-video");
-                    }
-                }*/
                 List<String> supportedFocusModes = parameters.getSupportedFocusModes();
                 if (supportedFocusModes != null && supportedFocusModes.size() > 0) {
                     if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
@@ -303,6 +286,9 @@ public class MediaUtils implements SurfaceHolder.Callback {
                 }
                 mCamera.setParameters(parameters);
                 mCamera.startPreview();
+                if (mRecordEvent!=null){
+                    mRecordEvent.onStarts();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -806,7 +792,7 @@ public class MediaUtils implements SurfaceHolder.Callback {
             queryArgs.putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs);
             queryArgs.putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, orderBy);
             if (SdkVersionUtils.isR()) {
-               // queryArgs.putString(ContentResolver.QUERY_ARG_SQL_LIMIT, limitCount + " offset " + offset);
+                // queryArgs.putString(ContentResolver.QUERY_ARG_SQL_LIMIT, limitCount + " offset " + offset);
             }
         }
         return queryArgs;

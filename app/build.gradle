@@ -50,16 +50,14 @@ android {
 
         release {
 
-            buildConfigField "boolean", "LOG_DEBUG", "false"
-            buildConfigField "boolean", "USE_CANARY", "false"
-            minifyEnabled true
-            shrinkResources true
-            zipAlignEnabled true
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            buildConfigField "boolean", "USE_CANARY", "true"
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     greendao {
-        schemaVersion 1
+        schemaVersion 2
         targetGenDir 'src/main/java'
         daoPackage "com.mmt.record.greendao"
     }

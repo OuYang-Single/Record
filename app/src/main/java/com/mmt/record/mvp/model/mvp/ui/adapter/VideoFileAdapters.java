@@ -15,6 +15,7 @@ import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.http.imageloader.ImageLoader;
 import com.jess.arms.utils.ArmsUtils;
 import com.mmt.record.R;
+import com.mmt.record.mvp.model.entity.FolderBean;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.LocalMediaFolder;
 import com.mmt.record.mvp.model.mvp.ui.Glide.PicassoImageConfig;
@@ -27,9 +28,9 @@ import java.util.List;
 
 import butterknife.BindView;
 
-public class VideoFileAdapters extends DefaultAdapter<LocalMediaFolder> {
+public class VideoFileAdapters extends DefaultAdapter<FolderBean> {
    ImageLoader mImageLoader;
-    public VideoFileAdapters(List<LocalMediaFolder> infos, ImageLoader mImageLoader) {
+    public VideoFileAdapters(List<FolderBean> infos, ImageLoader mImageLoader) {
         super(infos);
         this.mImageLoader=mImageLoader;
     }
@@ -37,7 +38,7 @@ public class VideoFileAdapters extends DefaultAdapter<LocalMediaFolder> {
 
     @NonNull
     @Override
-    public BaseHolder<LocalMediaFolder> getHolder(@NonNull View v, int viewType) {
+    public BaseHolder<FolderBean> getHolder(@NonNull View v, int viewType) {
 
         return new BaseHolders(v);
     }
@@ -48,7 +49,7 @@ public class VideoFileAdapters extends DefaultAdapter<LocalMediaFolder> {
         return R.layout.video_files_item;
     }
 
-    public class BaseHolders extends BaseHolder<LocalMediaFolder> {
+    public class BaseHolders extends BaseHolder<FolderBean> {
 
         @BindView(R.id.file_name)
         TextView file_name;
@@ -58,8 +59,8 @@ public class VideoFileAdapters extends DefaultAdapter<LocalMediaFolder> {
         }
 
         @Override
-        public void setData(@NonNull LocalMediaFolder videoEntity, int i) {
-            file_name.setText(videoEntity.getFolderName());
+        public void setData(@NonNull FolderBean videoEntity, int i) {
+            file_name.setText(videoEntity.getName());
 
         }
 

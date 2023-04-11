@@ -8,9 +8,12 @@ import com.jess.arms.utils.DataHelper;
 import com.mmt.record.greendao.ManagerFactory;
 import com.mmt.record.mvp.model.api.Api;
 import com.mmt.record.mvp.model.entity.User;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.IOException;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import okhttp3.Call;
 import okhttp3.Interceptor;
@@ -35,6 +38,8 @@ import okhttp3.Response;
 public class GlobalHttpHandlerImpl implements GlobalHttpHandler {
     private Context context;
     List<User> users;
+
+    Gson mGson;
     public GlobalHttpHandlerImpl(Context context) {
         this.context = context;
     }
@@ -50,7 +55,45 @@ public class GlobalHttpHandlerImpl implements GlobalHttpHandler {
      */
     @Override
     public Response onHttpResultResponse(String httpResult, Interceptor.Chain chain, Response response) {
+      try {
+          if (mGson==null){
+              mGson=new Gson();
+          }
+          com.mmt.record.mvp.model.entity.Request request=   mGson.fromJson(httpResult,com.mmt.record.mvp.model.entity.Request.class);
+          if ("-999".equals(request.getCode())){
+              OkHttpClient okHttpClient = new OkHttpClient();
+              MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+              RequestBody body = RequestBody.create(JSON, new Gson().toJson(users.get(0)));
+              Request requests = new Request.Builder()
+                      .url(Api.APP_DOMAIN+"/rest/login")
+                      .header("Content-Type","application/json")
+                      .post(body)
+                      .build();
+              final Call call = okHttpClient.newCall(requests);
 
+              Response execute=null;
+              try {
+                  execute=  call.execute();
+                  try {
+                      Gson gson=new Gson();
+                      com.mmt.record.mvp.model.entity.Request<User> userRequest=  gson.fromJson(execute.body().string(), new TypeToken< com.mmt.record.mvp.model.entity.Request<User>>() {}.getType());
+                      users.get(0).setToken(userRequest.getData().getToken());
+                      ManagerFactory.getInstance().getStudentManager(context).update(users);
+
+                  } catch (IOException e) {
+                      e.printStackTrace();
+                  }
+
+              } catch (IOException e) {
+                  e.printStackTrace();
+              }
+              Request request1=  chain.request();
+              request1 .newBuilder().header("authToken", users.get(0).getToken());
+
+              return chain.proceed(request1);
+          }
+          CrashReport.postCatchedException(new Throwable("日志内容:  请求回来"+httpResult));
+      } catch (Exception e){}
 
         return response;
     }

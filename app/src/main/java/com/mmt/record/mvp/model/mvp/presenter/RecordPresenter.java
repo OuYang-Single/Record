@@ -11,6 +11,7 @@ import android.location.Location;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
 
 import com.alibaba.android.arouter.launcher.ARouter;
@@ -53,8 +54,10 @@ import com.mmt.record.mvp.model.mvp.util.MediaUtil;
 import com.mmt.record.mvp.model.mvp.util.RecordManagerUtil;
 import com.mmt.record.mvp.model.mvp.util.ResourcesUtils;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
+import com.mmt.record.mvp.model.mvp.util.ToastUtils;
 import com.mmt.record.mvp.model.mvp.util.Utils;
 import com.tbruyelle.rxpermissions2.RxPermissions;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.alternativevision.gpx.GPXParser;
 import org.alternativevision.gpx.beans.GPX;
@@ -79,6 +82,7 @@ import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -269,12 +273,15 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
                     @Override
                     public void onError(Throwable t) {
                         Timber.e("" + t.toString());
+                        CrashReport.postCatchedException(new Throwable("日志内容:  上传失败11"+t.toString()));
                     }
                 });
 
     }
 
     public void onComplete(Observable<Request> observable, String targetName) {
+
+        CrashReport.postCatchedException(new Throwable("日志内容:  开始上传"));
         observable.subscribeOn(Schedulers.io())
                 .retryWhen(new RetryWithDelay(0, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
                 .doOnSubscribe(disposable -> {
@@ -288,21 +295,33 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
                 .subscribe(new ErrorHandleSubscriber<Request>(mErrorHandler) {
                     @Override
                     public void onNext(Request stringRequest) {
-                        FileEntity fileEntity = mFileEntityManager.queryBuilder().where(FileEntityDao.Properties.FilePath.eq(targetName)).build().unique();
-                        fileEntity.setUpload(true);
-                        mFileEntityManager.update(fileEntity);
+
+                        RecordManagerUtil.getInstance().deleteFiles();
+                        try {
+                            FileEntity fileEntity = mFileEntityManager.queryBuilder().where(FileEntityDao.Properties.FilePath.eq(targetName)).build().unique();
+                            if(fileEntity!=null){
+                                fileEntity.setUpload(true);
+                                mFileEntityManager.update(fileEntity);
+                            }
+                        }catch (Exception e){
+
+                        }
                         Timber.e("" + stringRequest.getData());
                         try {
                             new File(RecordModel.zipFileString).delete();
                         } catch (Exception e) {
 
                         }
+                        CrashReport.postCatchedException(new Throwable("日志内容:  上传成功"));
                     }
 
                     @Override
                     public void onError(Throwable t) {
                         Timber.e("" + t.toString());
+                        CrashReport.postCatchedException(t);
+                        CrashReport.postCatchedException(new Throwable("日志内容:  上传失败"+t.toString()));
                         try {
+                            RecordManagerUtil.getInstance().deleteFiles();
                             new File(RecordModel.zipFileString).delete();
                         } catch (Exception e) {
 
