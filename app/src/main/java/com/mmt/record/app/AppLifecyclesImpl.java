@@ -16,6 +16,7 @@ import com.jess.arms.integration.cache.IntelligentCache;
 import com.jess.arms.utils.ArmsUtils;
 
 import com.mmt.record.BuildConfig;
+import com.mmt.record.mvp.model.mvp.util.SPManager;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -48,7 +49,7 @@ public class AppLifecyclesImpl implements AppLifecycles {
         AppLifecyclesImpl.application =application;
         ARouter.init(application);
 
-
+        SPManager.initializeInstance(application);
      //   Market.valueOf()
       //  GuardianLivenessDetectionSDK.init(application, Market.BPS);
        // FirebaseMessaging.getInstance().setAutoInitEnabled(true);

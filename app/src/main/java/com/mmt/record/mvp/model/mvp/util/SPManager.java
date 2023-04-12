@@ -9,6 +9,7 @@ public class SPManager {
     //定义存储用户名字段
     private static final String SP_USER_NAME = "SPManager.UserName";
     private static final String SP_TOKEN = "SPManager.Token";
+    private static final String SP_FILE= "SPManager.FILE";
 
     private static SPManager instance;
     private SharedPreferences sp;
@@ -52,6 +53,15 @@ public class SPManager {
     //提取Token
     public String getToken() {
         return sp.getString(SP_TOKEN, null);
+    }
+
+    public void setFile(String userName) {
+        sp.edit().putString(SP_FILE, userName).apply();
+    }
+
+    //提取Token
+    public String getFile() {
+        return sp.getString(SP_FILE, null);
     }
 
 }

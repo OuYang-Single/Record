@@ -249,9 +249,24 @@
                         android:text="视频文件管理"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
-
+                    <ImageView
+                        android:src="@mipmap/set_video"
+                        android:padding="4dp"
+                        android:id="@+id/set_video"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_gravity="top|right"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"/>
 
                 </LinearLayout>
+                <TextView
+                    android:id="@+id/set_text"
+                    android:textSize="12dp"
+                    android:textColor="@color/bar_grey_90"
+                    android:text="@string/you_can_open"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
                 <FrameLayout
                     android:layout_weight="1"
                     android:layout_width="match_parent"
@@ -301,4 +316,5 @@
         android:layout_gravity="top|center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
 </FrameLayout>

@@ -89,9 +89,13 @@ public class RecordManagerUtil {
     }
 
     private void initDate() {
+        File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        if(SPManager. getInstance().getFile()!=null){
+            pathFile  =new  File(SPManager. getInstance().getFile());
+        }
 
         // 文件路径
-        File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+
         String dateTime = getTimeString(System.currentTimeMillis());
         parentFile = new File(pathFile.getPath() + "/" + dateTime);
         if (parentFile.mkdirs()) {

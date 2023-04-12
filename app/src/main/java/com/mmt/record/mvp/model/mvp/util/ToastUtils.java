@@ -9,4 +9,9 @@ public class ToastUtils {
         toast.setText(text);
         toast.show();
     }
+    public  static void makeTexts(Context mContext,String text){
+        Toast toast = Toast.makeText(mContext, "", Toast.LENGTH_LONG);
+        toast.setText(text);
+        toast.show();
+    }
 }

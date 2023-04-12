@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -33,6 +34,8 @@ import com.amap.api.maps.MapsInitializer;
 import com.amap.api.navi.NaviSetting;
 import com.hjq.shape.layout.ShapeLinearLayout;
 import com.hjq.shape.view.ShapeTextView;
+import com.hzc.widget.picker.file.FilePicker;
+import com.hzc.widget.picker.file.FilePickerUiParams;
 import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.di.component.AppComponent;
 import com.mmt.record.R;
@@ -52,11 +55,15 @@ import com.mmt.record.mvp.model.mvp.util.DateUtil;
 import com.mmt.record.mvp.model.mvp.util.NetworkType;
 import com.mmt.record.mvp.model.mvp.util.RecordManagerUtil;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
+import com.mmt.record.mvp.model.mvp.util.SPManager;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
+import com.zlylib.fileselectorlib.FileSelector;
+import com.zlylib.fileselectorlib.utils.Const;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -94,7 +101,10 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
     TextView user_name;
     @BindView(R.id.mainSurfaceView)
     SurfaceView mainSurfaceView;
-
+    @BindView(R.id.set_video)
+    ImageView set_video;
+    @BindView(R.id.set_text)
+    TextView set_text;
     @Inject
     GridLayoutManager manager;
 
@@ -142,6 +152,11 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         startService(intent);
         mPresenter.isLogIn();
         initTime();
+        File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        if(SPManager. getInstance().getFile()!=null){
+            pathFile  =new  File(SPManager. getInstance().getFile());
+        }
+        set_text.setText("视频存储目录:"+pathFile.getPath());
         mainSurfaceView.setVisibility(View.GONE);
         MapsInitializer.updatePrivacyShow(this,true,true);
         AMapLocationClient.updatePrivacyShow(this,true,true);
@@ -264,7 +279,7 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         user_name.setText(userName);
     }
 
-    @OnClick({R.id.labeleds,R.id.login_btn,R.id.image_break,R.id.login_btns})
+    @OnClick({R.id.labeleds,R.id.login_btn,R.id.image_break,R.id.login_btns,R.id.set_video})
     public void OnClick(View view){
         switch (view.getId()){
             case R.id.labeleds:
@@ -289,9 +304,32 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
                 mPresenter.logout();
 
                 break;
+             case R.id.set_video:
+
+                 FileSelector.from(this)
+                         .setTilteBg(R.color.txt_color) //不填写默认是： ?attr/colorPrimary
+                         .onlyShowFolder()  //只能选择文件夹
+                         .requestCode(1) //设置返回码
+                         .start();
+
+                break;
         }
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(data!=null){
+            ArrayList<String> essFileList = data.getStringArrayListExtra(Const.EXTRA_RESULT_SELECTION);
+            StringBuilder builder = new StringBuilder();
+            for (String file : essFileList) {
+                builder.append(file);
+            }
+            SPManager. getInstance().setFile(builder.toString());
+            set_text.setText("视频存储目录:"+builder.toString());
+            ToastUtils.makeTexts(this,"视频存储目录改为:"+builder.toString());
+        }
 
+    }
     @Override
     public void onNetDisconnected() {
         super.onNetDisconnected();

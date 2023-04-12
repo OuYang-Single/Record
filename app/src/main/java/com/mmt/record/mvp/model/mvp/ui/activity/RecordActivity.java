@@ -185,8 +185,14 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
                 break;
             case R.id.backs:
             case R.id.back:
-                isBack=true;
-                RecordManagerUtil.getInstance().stopRecord();
+
+                if (RecordManagerUtil.getInstance().isRecording){
+                    isBack=true;
+                    RecordManagerUtil.getInstance().stopRecord();
+                }else {
+                    finish();
+                }
+
                 break;
         }
     }

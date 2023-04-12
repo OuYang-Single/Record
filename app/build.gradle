@@ -73,7 +73,11 @@ android {
             jni.srcDirs=[]
         }
     }
+    dataBinding {
+        enabled = true
+    }
 }
+
 configurations.all {
     resolutionStrategy {
         force 'com.github.bumptech.glide:glide:4.9.0'//强制指定的版本
@@ -105,6 +109,8 @@ dependencies {
     annotationProcessor(rootProject.ext.dependencies["butterknife-compiler"]) {
         exclude module: 'support-annotations'
     }
+    implementation 'com.github.ZLYang110:FileSelector:2.1.6'
+    implementation 'com.github.ns3chz:Picker:1.0.2'
     implementation 'com.googlecode.libphonenumber:libphonenumber:7.7.2'
     //tools
     annotationProcessor rootProject.ext.dependencies["dagger2-compiler"]
