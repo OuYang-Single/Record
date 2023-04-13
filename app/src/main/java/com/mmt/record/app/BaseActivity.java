@@ -1,5 +1,7 @@
 package com.mmt.record.app;
 
+import static com.mmt.record.mvp.model.mvp.util.Utils.showNotification;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -102,6 +104,7 @@ public abstract class BaseActivity<P extends IPresenter> extends com.jess.arms.b
     public void onNetDisconnected() {
         img_network_type.setImageResource(R.mipmap.ic_no_network);
         tv_no_network.setVisibility(View.VISIBLE);
+        showNotification("网络异常","当前网络异常",this);
     }
 
     @Override

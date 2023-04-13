@@ -1,12 +1,23 @@
 package com.mmt.record.mvp.model.mvp.util;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+
+import com.mmt.record.R;
 
 import java.lang.reflect.Field;
 import java.util.regex.Matcher;
@@ -75,5 +86,72 @@ public class Utils {
         Matcher m = p.matcher(mobiles);
         return m.matches();
     }
+
+    /**
+     * 显示一条自然通知
+     */
+    public static void showNotification(@NonNull String title, @NonNull String content, Context  context) {
+
+       /* NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+// 定义Notification的各种属性
+        Notification.Builder mBuilder = new Notification.Builder(context)
+                .setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI)        //
+                .setSmallIcon(R.mipmap.ic_launcher)                                         //设置通知的图标
+                .setTicker("有新消息呢")                                                     //设置状态栏的标题
+                .setContentTitle(title)                                               //设置标题
+                .setContentText(content)                                                //消息内容
+                                                 //设置默认的提示音
+                 .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setPriority(Notification.PRIORITY_DEFAULT)                                 //设置该通知的优先级
+                .setOngoing(false)                                                          //让通知左右滑的时候不能取消通知
+                .setPriority(Notification.PRIORITY_DEFAULT)                                 //设置该通知的优先级
+                                                   //设置通知时间，默认为系统发出通知的时间，通常不用设置
+                .setAutoCancel(true);        */                                               //打开程序后图标消失
+//处理点击Notification的逻辑
+     /*   Intent resultIntent = new Intent(this, TestActivity.class);
+        resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);           //添加为栈顶Activity
+        resultIntent.putExtra("what",5);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(this,5,resultIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);*/
+//发送
+    //    mNotificationManager.notify(1, mBuilder.build());
+//结束广播
+/*mNotificationManager.cancel(1);*/
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+    /*    Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, 0);*/
+
+        String channelId = createNotificationChannel("my_channel_ID", "my_channel_NAME", NotificationManager.IMPORTANCE_HIGH,context);
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(context, channelId)
+                .setTicker("有新消息呢")                                                     //设置状态栏的标题
+                .setContentTitle(title)                                               //设置标题
+                .setContentText(content)                                                //消息内容
+                //设置默认的提示音
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE|Notification.DEFAULT_LIGHTS)//设置使用系统默认的声音、默认震动
+                .setPriority(Notification.PRIORITY_DEFAULT)                                 //设置该通知的优先级
+                .setOngoing(false)                                                          //让通知左右滑的时候不能取消通知
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .setWhen(System.currentTimeMillis());
+
+
+        notificationManager.notify(16657, notification.build());
+
+    }
+    private static String createNotificationChannel(String channelID, String channelNAME, int level, Context context) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationManager manager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel(channelID, channelNAME, level);
+            manager.createNotificationChannel(channel);
+            return channelID;
+        } else {
+            return null;
+        }
+    }
+
+
 }
  
