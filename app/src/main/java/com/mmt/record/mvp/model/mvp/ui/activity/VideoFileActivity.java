@@ -1,5 +1,7 @@
 package com.mmt.record.mvp.model.mvp.ui.activity;
 
+import static com.mmt.record.mvp.model.mvp.util.Utils.showNotification;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,16 +36,18 @@ import com.amap.api.maps.MapsInitializer;
 import com.amap.api.navi.NaviSetting;
 import com.hjq.shape.layout.ShapeLinearLayout;
 import com.hjq.shape.view.ShapeTextView;
-import com.hzc.widget.picker.file.FilePicker;
-import com.hzc.widget.picker.file.FilePickerUiParams;
+
 import com.jess.arms.base.DefaultAdapter;
 import com.jess.arms.di.component.AppComponent;
 import com.mmt.record.R;
 import com.mmt.record.app.BaseActivity;
 
+import com.mmt.record.greendao.FolderBeanDao;
+import com.mmt.record.greendao.ManagerFactory;
 import com.mmt.record.greendao.UserManager;
 import com.mmt.record.mvp.model.di.component.DaggerVideoFileComponent;
 import com.mmt.record.mvp.model.entity.EventMessage;
+import com.mmt.record.mvp.model.entity.FolderBean;
 import com.mmt.record.mvp.model.entity.LocalMedia;
 import com.mmt.record.mvp.model.entity.LocalMediaFolder;
 import com.mmt.record.mvp.model.mvp.contract.VideoFileContract;
@@ -63,15 +67,18 @@ import com.zlylib.fileselectorlib.utils.Const;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import me.leefeng.promptlibrary.PromptDialog;
+import timber.log.Timber;
 
 @Route(path = RoutingUtils.VIDEO_FILE_PATH)
 public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implements VideoFileContract.View, RecordManagerUtil.RecordEvent {
@@ -156,6 +163,11 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         if(SPManager. getInstance().getFile()!=null){
             pathFile  =new  File(SPManager. getInstance().getFile());
         }
+        if (!pathFile.exists()){
+            pathFile  =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        }
+
+
         set_text.setText("视频存储目录:"+pathFile.getPath());
         mainSurfaceView.setVisibility(View.GONE);
         MapsInitializer.updatePrivacyShow(this,true,true);
@@ -209,6 +221,12 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         });
 
     }
+    private String getTimeString(long timeLong) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        Date d1 = new Date(timeLong);
+        return format.format(d1);
+    }
+
 
 
     @Override
@@ -219,6 +237,16 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
         localMediaFolderList.clear();
         showLoading();
         mPresenter. getVideos();
+        File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        if(SPManager. getInstance().getFile()!=null){
+            pathFile  =new  File(SPManager. getInstance().getFile());
+        }
+        if (!pathFile.exists()){
+            pathFile  =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+            SPManager. getInstance().setFile(pathFile.getPath());
+        }
+
+        set_text.setText("视频存储目录:"+pathFile.getPath());
     }
 
     @Override
@@ -324,9 +352,19 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
             for (String file : essFileList) {
                 builder.append(file);
             }
-            SPManager. getInstance().setFile(builder.toString());
-            set_text.setText("视频存储目录:"+builder.toString());
-            ToastUtils.makeTexts(this,"视频存储目录改为:"+builder.toString());
+
+            if (builder.toString().contains("emulated/0")){
+                   SPManager. getInstance().setFile(builder.toString());
+                showNotification("视频存储","视频存储目录改为:"+builder.toString(),this);
+                ToastUtils.makeTexts(this,"视频存储目录改为:"+builder.toString());
+            }else {
+                ToastUtils.makeTexts(this,"因在SD卡中只有指定的文件目录才能创建文件，因此SD卡视频存储目录只能为改为:"+getExternalFilesDir(null).getPath());
+                set_text.setText("视频存储目录:"+getExternalFilesDir(null).getPath());
+                SPManager. getInstance().setFile(getExternalFilesDir(null).getPath());
+                showNotification("视频存储","因在SD卡中只有指定的文件目录才能创建文件，因此SD卡视频存储目录只能为改为:"+getExternalFilesDir(null).getPath(),this);
+            }
+
+
         }
 
     }
@@ -362,6 +400,11 @@ public class VideoFileActivity extends BaseActivity<VideoFilePresenter> implemen
 
     @Override
     public void onStarts() {
+
+    }
+
+    @Override
+    public void onException() {
 
     }
 

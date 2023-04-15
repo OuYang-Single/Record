@@ -294,5 +294,6 @@ public void deleteFile(){
         void onComplete(File parentFile,String targetName);
         void onStop(File parentFile,String targetName);
         void onStarts();
+        void onException();
     }
 }

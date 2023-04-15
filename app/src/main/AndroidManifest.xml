@@ -30,6 +30,15 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--外部存储的写权限-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--外部存储的读权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name="com.jess.arms.base.BaseApplication"
         android:allowBackup="true"
@@ -55,12 +64,7 @@
             android:theme="@android:style/Theme.NoTitleBar" />
         <activity android:name="com.zlylib.fileselectorlib.ui.FileSelectorActivity"
             android:screenOrientation="landscape"/>
-        <activity
-            android:name="com.hzc.widget.picker.file.FilePickerActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme"
-            android:screenOrientation="unspecified" />
+
         <activity
             android:name=".mvp.model.mvp.ui.activity.RegisterActivity"
             android:exported="false"

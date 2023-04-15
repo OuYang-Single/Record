@@ -2,6 +2,7 @@ package com.mmt.record.mvp.model.mvp.ui.activity;
 
 import static com.mmt.record.mvp.model.mvp.model.RecordModel.gpxFileString;
 import static com.mmt.record.mvp.model.mvp.util.RoutingUtils.MAIN_PATH;
+import static com.mmt.record.mvp.model.mvp.util.Utils.showNotification;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -11,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -46,6 +48,7 @@ import com.mmt.record.mvp.model.mvp.util.DateUtil;
 import com.mmt.record.mvp.model.mvp.util.FileSaveUtils;
 import com.mmt.record.mvp.model.mvp.util.RecordManagerUtil;
 import com.mmt.record.mvp.model.mvp.util.RoutingUtils;
+import com.mmt.record.mvp.model.mvp.util.SPManager;
 import com.mmt.record.mvp.model.mvp.util.ToastUtils;
 import com.mmt.record.mvp.model.wigth.Camera2View;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -141,10 +144,18 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     @Override
     public void initData(@Nullable Bundle bundle) {
         Log.w("RecordActivity","initData");
+        File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        if(SPManager. getInstance().getFile()!=null){
+            pathFile  =new  File(SPManager. getInstance().getFile());
+        }
+        if (!pathFile.exists()){
+            pathFile  =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+            SPManager. getInstance().setFile(pathFile.getPath());
+        }
         RecordManagerUtil.getInstance().init(this, mainSurfaceView, this);
         initTime();
         mPresenter.isLogIn();
-        labeleds.setText("停止录制");
+
         mMapView.onCreate(bundle);
        // Camera2View.show(this);
         ViewAnimator.animate(recordImg).alpha(0f, 1f, 0f).repeatCount(-1).duration(1000).start();
@@ -178,8 +189,18 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
             case R.id.labeleds:
                 if (RecordManagerUtil.getInstance().isRecording) {
                     labeleds.setText("开始录制");
+                    ToastUtils.makeText(this,"录制停止...");
+                    showNotification("录制通知","录制停止...",this);
                     RecordManagerUtil.getInstance().stopRecord();
                 } else {
+                    File pathFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+                    if(SPManager. getInstance().getFile()!=null){
+                        pathFile  =new  File(SPManager. getInstance().getFile());
+                    }
+                    if (!pathFile.exists()){
+                        pathFile  =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+                        SPManager. getInstance().setFile(pathFile.getPath());
+                    }
                     mPresenter.Apply(0);
                 }
                 break;
@@ -204,6 +225,11 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
             startTime = System.currentTimeMillis();
             RecordManagerUtil.getInstance().startRecord(5);
             labeleds.setText("停止录制");
+            ToastUtils.makeText(this,"正在录制...");
+            showNotification("录制通知","正在录制...",this);
+        }else {
+            ToastUtils.makeText(this,"录制失败，请联系管理员...");
+            showNotification("录制通知","录制失败，请联系管理员...",this);
         }
 
         mPresenter.Location(mMapView);
@@ -232,6 +258,9 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
     public void onStop(File parentFile, String targetName) {
       if (isBack){
           finish();
+      }else {
+          mPresenter.onComplete(parentFile, targetName);
+          mPresenter.gpsUpload(parentFile, targetName, false);
       }
     }
 
@@ -240,6 +269,13 @@ public class RecordActivity extends BaseActivity<RecordPresenter> implements Rec
         if (mPresenter != null) {
             mPresenter.Apply(100);
         }
+    }
+
+    @Override
+    public void onException() {
+        ToastUtils.makeText(this,"录制失败，请联系管理员...");
+        showNotification("录制通知","录制失败，请联系管理员...",this);
+
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.mmt.record.mvp.model.mvp.presenter;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.jess.arms.utils.PermissionUtil.requestPermission;
+import static com.mmt.record.mvp.model.mvp.util.Utils.showNotification;
 
 import android.Manifest;
 import android.app.Application;
@@ -188,7 +189,10 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
                               }
                           }, permissions, mErrorHandler,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_PHONE_STATE,
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.INTERNET,
@@ -259,20 +263,24 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
     }
 
     public void onComplete(File parentFile, String targetName) {
+        ToastUtils.makeText(mAppManager.getTopActivity(),"视频开始上传...");
+        showNotification("上传通知","视频开始上传...",mAppManager.getTopActivity());
         mModel.onComplete(parentFile.getPath() + "/" + targetName)
                 .subscribeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .compose(RxLifecycleUtils.bindToLifecycle(mRootView))//使用 Rxlifecycle,使 Disposable 和 Activity 一起销毁
-                .subscribe(new ErrorHandleSubscriber<Observable>(mErrorHandler) {
+                .subscribe(new ErrorHandleSubscriber<Observable<Request>>(mErrorHandler) {
                     @Override
-                    public void onNext(Observable observable) {
+                    public void onNext(Observable<Request> observable) {
                         Timber.e("onComplete");
+
                         RecordPresenter.this.onComplete(observable, targetName);
                     }
 
                     @Override
                     public void onError(Throwable t) {
                         Timber.e("" + t.toString());
+                        showNotification("上传通知","视频上传失败，请检查网络...",mAppManager.getTopActivity());
                         CrashReport.postCatchedException(new Throwable("日志内容:  上传失败11"+t.toString()));
                     }
                 });
@@ -295,6 +303,13 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
                 .subscribe(new ErrorHandleSubscriber<Request>(mErrorHandler) {
                     @Override
                     public void onNext(Request stringRequest) {
+                        if ("1000".equals(stringRequest.getCode())){
+                            ToastUtils.makeText(mAppManager.getTopActivity(),"视频上传成功...");
+                            showNotification("上传通知","视频上传成功...",mAppManager.getTopActivity());
+                        }else {
+                            ToastUtils.makeText(mAppManager.getTopActivity(),"视频上传失败，"+stringRequest.getMsg());
+                            showNotification("上传通知","视频上传失败，"+stringRequest.getMsg(),mAppManager.getTopActivity());
+                        }
 
                         RecordManagerUtil.getInstance().deleteFiles();
                         try {
@@ -317,6 +332,7 @@ public class RecordPresenter extends BasePresenter<RecordContract.Model, RecordC
 
                     @Override
                     public void onError(Throwable t) {
+                        showNotification("上传通知","视频上传失败，请检查网络...",mAppManager.getTopActivity());
                         Timber.e("" + t.toString());
                         CrashReport.postCatchedException(t);
                         CrashReport.postCatchedException(new Throwable("日志内容:  上传失败"+t.toString()));
